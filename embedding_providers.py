@@ -40,7 +40,7 @@ class Provider:
         try:
             # 直接调用内部方法，绕过公开方法的异常处理
             emb = await self._get_embedding(TEXT)
-            logger.info(f"emb:{emb}")
+            logger.info(f"name:{self.__name__},emb:{emb}")
             # 验证返回格式：非空列表且包含浮点数
             return bool(emb) and isinstance(emb, list) and all(isinstance(x, float) for x in emb)
         except httpx.HTTPStatusError as e:
@@ -109,6 +109,7 @@ class BaiduProvider(Provider):
             # 主动刷新token保证有效性检查
             if not self.access_token or (dt.now() - self.token_timestamp).days >= 30:
                 self.access_token = await self.get_access_token()
+            logger.info(f"token:{self.access_token}")
             return await super().is_available()
         except Exception as e:
             logger.debug(f"百度服务检查异常: {str(e)}")

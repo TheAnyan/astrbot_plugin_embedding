@@ -69,6 +69,7 @@ class BaiduProvider(Provider):
         async with httpx.AsyncClient(timeout=30) as client:
             if not self.access_token or abs((dt.now() - self.token_timestamp).days) > 30:
                 self.access_token = await self.get_access_token()
+            logger.info(f"baidu2")
             params = {"access_token": self.access_token}
             payload = {"input": [text]}
             headers = {"Content-Type": "application/json"}
@@ -76,6 +77,7 @@ class BaiduProvider(Provider):
                 self.url + "/" + self.model,
                 headers=headers, params=params, json=payload)
             response.raise_for_status()  # 自动处理4xx/5xx状态码
+            logger.info(f"baidu{response}")
             return response.json()["data"][0]["embedding"]
 
 

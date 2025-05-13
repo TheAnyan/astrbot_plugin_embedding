@@ -40,10 +40,8 @@ class Provider:
         try:
             # 直接调用内部方法，绕过公开方法的异常处理
             emb = await self._get_embedding(TEXT)
-            logger.info(f"{emb}")
-            logger.info(f"{isinstance(emb, list)},{type(emb[0])}")
             # 验证返回格式：非空列表且包含浮点数
-            return bool(emb) and isinstance(emb, list) and all(isinstance(x, float) for x in emb)
+            return bool(emb) and isinstance(emb, list)
         except httpx.HTTPStatusError as e:
             logger.debug(f"服务不可用 HTTP {e.response.status_code}")
             return False

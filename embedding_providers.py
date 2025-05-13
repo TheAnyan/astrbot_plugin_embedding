@@ -64,8 +64,9 @@ class BaiduProvider(Provider):
 
     async def _get_embedding(self,text:str) -> Optional[list]:
         """获取embedding（异步版本）"""
-        if not self.access_token or abs((dt.now() - self.token_timestamp).days) > 30:
+        if not self.access_token or abs((dt.now() - self.token_timestamp).days) >= 30:
             self.access_token = await self.get_access_token()
+        logger.info(f"access_token:{self.access_token}")
         async with httpx.AsyncClient(timeout=30) as client:
             params = {"access_token": self.access_token}
             payload = {"input": [text]}
@@ -103,17 +104,6 @@ class BaiduProvider(Provider):
             logger.error("响应缺少access_token字段")
         return None
 
-    async def is_available(self) -> bool:
-        """百度定制检查：强制刷新token"""
-        try:
-            # 主动刷新token保证有效性检查
-            if not self.access_token or (dt.now() - self.token_timestamp).days >= 30:
-                self.access_token = await self.get_access_token()
-            logger.info(f"token:{self.access_token}")
-            return await super().is_available()
-        except Exception as e:
-            logger.debug(f"百度服务检查异常: {str(e)}")
-            return False
 
 
 class OpenaiProvider(Provider):

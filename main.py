@@ -1,9 +1,8 @@
 from astrbot.api.event import filter, AstrMessageEvent, MessageEventResult
 from astrbot.api.star import Context, Star, register
-from astrbot.core.log import LogManager
+from astrbot.api import logger
 from .provider_mapping import get_provider,PROVIDER_CLASS_MAP # 假设provider_mapping在同一目录
 
-EMlogger= LogManager.GetLogger(log_name="EmbeddingAdapter")
 
 @register("EmbeddingAdapter", "AnYan", "提供对各种服务商的embedding模型支持", "1.0.0")
 class EmbeddingAdapter(Star):
@@ -21,9 +20,9 @@ class EmbeddingAdapter(Star):
                 try:
                     provider = get_provider(provider_name, provider_config)
                     self.providers[provider_name] = provider
-                    EMlogger.info(f"成功初始化服务商: {provider_name}")
+                    logger.info(f"成功初始化服务商: {provider_name}")
                 except ValueError as e:
-                    EMlogger.error(f"服务商 {provider_name} 初始化失败: {str(e)}")
+                    logger.error(f"服务商 {provider_name} 初始化失败: {str(e)}")
 
         # 设置目前服务商
         self.current_provider = self.providers[config["whichprovider"]]

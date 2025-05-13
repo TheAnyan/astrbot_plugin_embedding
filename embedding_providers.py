@@ -6,7 +6,7 @@ import httpx
 import json
 from datetime import datetime as dt
 from typing import Optional
-from .main import EMlogger
+from astrbot.api import logger
 
 TEXT="test"
 
@@ -26,13 +26,13 @@ class Provider:
         try:
             response = await self._get_embedding(text)
         except httpx.HTTPStatusError as e:
-            EMlogger.error(f"API错误: {e.response.status_code} - {e.response.text}")
+            logger.error(f"API错误: {e.response.status_code} - {e.response.text}")
         except httpx.RequestError as e:
-            EMlogger.error(f"网络请求失败: {str(e)}")
+            logger.error(f"网络请求失败: {str(e)}")
         except json.JSONDecodeError:
-            EMlogger.error("响应数据解析失败")
+            logger.error("响应数据解析失败")
         except Exception as e:
-            EMlogger.error(f"未知错误: {str(e)}")
+            logger.error(f"未知错误: {str(e)}")
 
     async def is_available(self) -> bool:
         """通过实际嵌入请求验证服务可用性"""
@@ -42,13 +42,13 @@ class Provider:
             # 验证返回格式：非空列表且包含浮点数
             return bool(emb) and isinstance(emb, list) and all(isinstance(x, float) for x in emb)
         except httpx.HTTPStatusError as e:
-            EMlogger.debug(f"服务不可用 HTTP {e.response.status_code}")
+            logger.debug(f"服务不可用 HTTP {e.response.status_code}")
             return False
         except (httpx.RequestError, KeyError, ValueError, TypeError) as e:
-            EMlogger.debug(f"服务检查失败: {type(e).__name__}")
+            logger.debug(f"服务检查失败: {type(e).__name__}")
             return False
         except Exception as e:
-            EMlogger.error(f"未知错误: {str(e)}")
+            logger.error(f"未知错误: {str(e)}")
             return False
 
 
@@ -96,11 +96,11 @@ class BaiduProvider(Provider):
                 response.raise_for_status()
                 return response.json()["access_token"]
         except httpx.HTTPStatusError as e:
-            EMlogger.error(f"百度千帆鉴权失败 HTTP错误: {e.response.status_code}")
+            logger.error(f"百度千帆鉴权失败 HTTP错误: {e.response.status_code}")
         except httpx.ConnectError as e:
-            EMlogger.error(f"错误详情: {e.__cause__}")
+            logger.error(f"错误详情: {e.__cause__}")
         except KeyError:
-            EMlogger.error("响应缺少access_token字段")
+            logger.error("响应缺少access_token字段")
         return None
 
     async def is_available(self) -> bool:
@@ -111,7 +111,7 @@ class BaiduProvider(Provider):
                 await self.get_access_token()
             return await super().is_available()
         except Exception as e:
-            EMlogger.debug(f"百度服务检查异常: {str(e)}")
+            logger.debug(f"百度服务检查异常: {str(e)}")
             return False
 
 

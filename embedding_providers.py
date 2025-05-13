@@ -66,7 +66,6 @@ class BaiduProvider(Provider):
         """获取embedding（异步版本）"""
         if not self.access_token or abs((dt.now() - self.token_timestamp).days) >= 30:
             self.access_token = await self.get_access_token()
-        logger.info(f"access_token:{self.access_token}")
         async with httpx.AsyncClient(timeout=30) as client:
             params = {"access_token": self.access_token}
             payload = {"input": [text]}

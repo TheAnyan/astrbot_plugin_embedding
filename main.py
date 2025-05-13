@@ -1,3 +1,7 @@
+"""
+main.py
+插件主程序
+"""
 import asyncio
 
 from astrbot.api.event import filter, AstrMessageEvent, MessageEventResult

@@ -64,11 +64,9 @@ class BaiduProvider(Provider):
 
     async def _get_embedding(self,text:str) -> Optional[list]:
         """获取embedding（异步版本）"""
-        logger.info(f"baidu")
+        if not self.access_token or abs((dt.now() - self.token_timestamp).days) > 30:
+            self.access_token = await self.get_access_token()
         async with httpx.AsyncClient(timeout=30) as client:
-            if not self.access_token or abs((dt.now() - self.token_timestamp).days) > 30:
-                self.access_token = await self.get_access_token()
-            logger.info(f"baidu2")
             params = {"access_token": self.access_token}
             payload = {"input": [text]}
             headers = {"Content-Type": "application/json"}
@@ -76,7 +74,6 @@ class BaiduProvider(Provider):
                 self.url + "/" + self.model,
                 headers=headers, params=params, json=payload)
             response.raise_for_status()  # 自动处理4xx/5xx状态码
-            logger.info(f"baidu{response}")
             return response.json()["data"][0]["embedding"]
 
 
@@ -96,6 +93,7 @@ class BaiduProvider(Provider):
             async with httpx.AsyncClient(timeout=30) as client:
                 response = await client.get(auth_url, params=params, headers=headers)
                 response.raise_for_status()
+                self.token_timestamp=dt.now()
                 return response.json()["access_token"]
         except httpx.HTTPStatusError as e:
             logger.error(f"百度千帆鉴权失败 HTTP错误: {e.response.status_code}")

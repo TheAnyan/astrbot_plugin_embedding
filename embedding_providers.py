@@ -41,7 +41,7 @@ class Provider:
             # 直接调用内部方法，绕过公开方法的异常处理
             emb = await self._get_embedding(TEXT)
             logger.info(f"{emb}")
-            logger.info(f"{isinstance(emb, list)},{all(isinstance(x, float) for x in emb)},{all(isinstance(x, str) for x in emb)}")
+            logger.info(f"{isinstance(emb, list)},{type(emb[0])}")
             # 验证返回格式：非空列表且包含浮点数
             return bool(emb) and isinstance(emb, list) and all(isinstance(x, float) for x in emb)
         except httpx.HTTPStatusError as e:

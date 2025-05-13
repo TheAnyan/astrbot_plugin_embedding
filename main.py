@@ -25,7 +25,8 @@ class EmbeddingAdapter(Star):
                     logger.error(f"服务商 {provider_name} 初始化失败: {str(e)}")
 
         # 设置目前服务商
-        self.current_provider = self.providers[config["whichprovider"]]
+        if config["whichprovider"]:
+            self.current_provider = self.providers[config["whichprovider"]]
 
 
     async def initialize(self):

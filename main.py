@@ -1,6 +1,9 @@
+import asyncio
+
 from astrbot.api.event import filter, AstrMessageEvent, MessageEventResult
 from astrbot.api.star import Context, Star, register
 from astrbot.api import logger
+
 from .provider_mapping import get_provider,PROVIDER_CLASS_MAP # 假设provider_mapping在同一目录
 
 
@@ -44,12 +47,25 @@ class EmbeddingAdapter(Star):
         if not self.providers:
             yield event.plain_result("未配置任何有效的embedding服务商")
 
-        reply_list=[]
-        for name, provider in self.providers.items():
-            status = "[√]" if provider == self.current_provider else "[  ]"
-            available= "(available)" if (await provider.is_available()) else ""
-            reply_list.append(f"{status} {name} {available}")
+        availability_tasks = {
+            name: provider.is_available()
+            for name, provider in self.providers.items()
+        }
+        results = await asyncio.gather(*availability_tasks.values(), return_exceptions=True)
 
+        # 构建状态信息
+        reply_list=[]
+        for (name, provider), available in zip(self.providers.items(), results):
+            try:
+                is_available = "(可用)" if available else "(不可用)"
+            except Exception as e:
+                logger.error(f"检查服务商 {name} 状态失败: {str(e)}")
+                is_available = "(状态未知)"
+
+            current_flag = "[√]" if provider == self.current_provider else "[  ]"
+            reply_list.append(f"{current_flag} {name} {is_available}")
+
+        # 格式化输出
         yield event.plain_result("\n".join(reply_list))
 
 

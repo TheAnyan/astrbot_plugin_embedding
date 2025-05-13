@@ -1,0 +1,33 @@
+{
+     "whichprovider": {
+        "type": "string",
+        "description": "选择调用embedding的provider",
+        "options": ["ollama", "openai","baidu"]
+      },
+     "api_url": {
+        "type": "string",
+        "description": "在线api服务地址",
+        "options": ["https://api.openai.com/v1/embeddings", "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/embeddings"]
+      },
+      "api_key": {
+        "type": "string",
+        "description": "api_key"
+      },
+      "secret_key": {
+        "type": "string",
+        "description": "secret_key",
+        "hint": "在调用百度应用使用"
+      },
+      "ollama_api_url": {
+        "type": "string",
+        "description": "Ollama服务地址",
+        "hint": "当whichprovider为ollama时可用",
+        "default": "http://localhost:11434"
+      },
+      "embed_model": {
+        "type": "string",
+        "description": "Embedding模型名称",
+        "hint": "Ollama: quentinz/bge-small-zh-v1.5, bge-m3\r Baidu: embedding-v1, bge_large_zh\r"
+      }
+
+}

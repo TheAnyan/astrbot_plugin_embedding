@@ -46,7 +46,7 @@ class EmbeddingAdapter(Star):
 
         reply_list=[]
         for name, provider in self.providers.items():
-            status = "✅" if provider == self.current_provider else "  "
+            status = "✅" if provider == self.current_provider else "\t"
             available= "(available)" if provider.is_available() else ""
             reply_list.append(f"{status} {name} {available}")
 

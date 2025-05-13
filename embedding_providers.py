@@ -25,6 +25,7 @@ class Provider:
         """获取embedding（异步版本）"""
         try:
             response = await self._get_embedding(text)
+            return response
         except httpx.HTTPStatusError as e:
             logger.error(f"API错误: {e.response.status_code} - {e.response.text}")
         except httpx.RequestError as e:
@@ -37,6 +38,7 @@ class Provider:
     async def is_available(self) -> bool:
         """通过实际嵌入请求验证服务可用性"""
         try:
+            logger.info(f"TEXT: {TEXT}")
             # 直接调用内部方法，绕过公开方法的异常处理
             emb = await self._get_embedding(TEXT)
             logger.info(f"<UNK>: {emb}")

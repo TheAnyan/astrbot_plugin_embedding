@@ -1,6 +1,6 @@
 from astrbot.api.event import filter, AstrMessageEvent, MessageEventResult
 from astrbot.api.star import Context, Star, register
-from astrbot.api import LogManager
+from astrbot.core.log import LogManager
 from .provider_mapping import get_provider,PROVIDER_CLASS_MAP # 假设provider_mapping在同一目录
 
 EMlogger= LogManager.GetLogger(log_name="EmbeddingAdapter")

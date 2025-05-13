@@ -44,10 +44,13 @@ class EmbeddingAdapter(Star):
         if not self.providers:
             yield event.plain_result("未配置任何有效的embedding服务商")
 
+        reply_list=[]
         for name, provider in self.providers.items():
             status = "✅" if provider == self.current_provider else "  "
             available= "(available)" if provider.is_available() else ""
-            yield event.plain_result(f"{status} {name} {available}")
+            reply_list.append(f"{status} {name} {available}")
+
+        yield "\n".join(reply_list)
 
 
     @filter.permission_type(filter.PermissionType.ADMIN)

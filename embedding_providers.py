@@ -40,6 +40,8 @@ class Provider:
         try:
             # 直接调用内部方法，绕过公开方法的异常处理
             emb = await self._get_embedding(TEXT)
+            logger.info(f"{emb}")
+            logger.info(f"{isinstance(emb, list)},{all(isinstance(x, float) for x in emb)},{all(isinstance(x, str) for x in emb)}")
             # 验证返回格式：非空列表且包含浮点数
             return bool(emb) and isinstance(emb, list) and all(isinstance(x, float) for x in emb)
         except httpx.HTTPStatusError as e:
@@ -75,7 +77,6 @@ class BaiduProvider(Provider):
                 self.url + "/" + self.model,
                 headers=headers, params=params, json=payload)
             response.raise_for_status()  # 自动处理4xx/5xx状态码
-            logger.info(f"{response.json()}")
             return response.json()["data"][0]["embedding"]
 
 

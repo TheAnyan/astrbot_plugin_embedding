@@ -20,7 +20,7 @@ PROVIDER_CLASS_MAP = {
 REQUIRED_CONFIGS = {
     "baidu": ["api_url", "embed_model", "api_key", "secret_key"],
     "openai": ["api_url", "embed_model", "api_key"],
-    "ollama": ["api_url", "embed_model", "ollama_api_url"]
+    "ollama": ["api_url", "embed_model"]
 }
 
 

@@ -38,10 +38,8 @@ class Provider:
     async def is_available(self) -> bool:
         """通过实际嵌入请求验证服务可用性"""
         try:
-            logger.info(f"TEXT: {TEXT}")
             # 直接调用内部方法，绕过公开方法的异常处理
             emb = await self._get_embedding(TEXT)
-            logger.info(f"<UNK>: {emb}")
             # 验证返回格式：非空列表且包含浮点数
             return bool(emb) and isinstance(emb, list) and all(isinstance(x, float) for x in emb)
         except httpx.HTTPStatusError as e:
@@ -57,19 +55,17 @@ class Provider:
 
 
 class BaiduProvider(Provider):
-    # 百度
-    token_timestamp: dt
-    access_token: str
-
     def __init__(self,config:dict) -> None:
         super().__init__(config)
         self.api_key = self.config["api_key"]
         self.secret_key = self.config["secret_key"]
+        self.token_timestamp=None
+        self.access_token=""
 
     async def _get_embedding(self,text:str) -> Optional[list]:
         """获取embedding（异步版本）"""
         async with httpx.AsyncClient(timeout=30) as client:
-            if abs((dt.now() - self.token_timestamp).days) < 30 or not self.access_token:
+            if not self.access_token or abs((dt.now() - self.token_timestamp).days) > 30:
                 self.access_token = await self.get_access_token()
             params = {"access_token": self.access_token}
             payload = {"input": [text]}
@@ -110,8 +106,8 @@ class BaiduProvider(Provider):
         """百度定制检查：强制刷新token"""
         try:
             # 主动刷新token保证有效性检查
-            if not hasattr(self, "access_token") or (dt.now() - self.token_timestamp).days >= 30:
-                await self.get_access_token()
+            if not self.access_token or (dt.now() - self.token_timestamp).days >= 30:
+                self.access_token = await self.get_access_token()
             return await super().is_available()
         except Exception as e:
             logger.debug(f"百度服务检查异常: {str(e)}")

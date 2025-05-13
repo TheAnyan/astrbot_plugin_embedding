@@ -50,7 +50,7 @@ class EmbeddingAdapter(Star):
             available= "(available)" if provider.is_available() else ""
             reply_list.append(f"{status} {name} {available}")
 
-        yield "\n".join(reply_list)
+        yield event.plain_result("\n".join(reply_list))
 
 
     @filter.permission_type(filter.PermissionType.ADMIN)

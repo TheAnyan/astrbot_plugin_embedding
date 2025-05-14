@@ -31,11 +31,11 @@ class Provider:
             logger.error(f"未知错误: {str(e)}")
 
 
-    async def get_model_name(self) -> int:
+    def get_model_name(self) -> int:
         """获取embeddingmodel"""
         return self.config['embed_model']
 
-    async def get_provider_name(self) -> int:
+    def get_provider_name(self) -> int:
         """获取embeddingmodel"""
         return self.__class__.__name__
 

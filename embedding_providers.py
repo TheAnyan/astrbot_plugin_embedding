@@ -25,13 +25,19 @@ class Provider:
             return len(emb)
         except httpx.HTTPStatusError as e:
             logger.debug(f"服务不可用 HTTP {e.response.status_code}")
-            return False
         except (httpx.RequestError, KeyError, ValueError, TypeError) as e:
             logger.debug(f"服务检查失败: {type(e).__name__}")
-            return False
         except Exception as e:
             logger.error(f"未知错误: {str(e)}")
-            return False
+
+
+    async def get_model(self) -> int:
+        """获取embeddingmodel"""
+        return self.config['embed_model']
+
+    async def get_provider_name(self) -> int:
+        """获取embeddingmodel"""
+        return self.__class__.__name__
 
 
     async def _get_embedding(self, text: str) -> Optional[list]:

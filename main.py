@@ -40,6 +40,18 @@ class EmbeddingAdapter(Star):
         """可选择实现异步的插件初始化方法，当实例化该插件类之后会自动调用该方法。"""
         pass
 
+    def get_embedding(self):
+        """可选择实现异步的插件初始化方法，当实例化该插件类之后会自动调用该方法。"""
+        return self.current_provider.get_embedding()
+
+    def get_model(self):
+        """可选择实现异步的插件初始化方法，当实例化该插件类之后会自动调用该方法。"""
+        return self.current_provider.get_model()
+
+    def get_provider_name(self):
+        """可选择实现异步的插件初始化方法，当实例化该插件类之后会自动调用该方法。"""
+        return self.current_provider.get_provider_name()
+
     @filter.command_group("Embedding_Manager", alias={'em'})
     def embedding_manager(self):
         pass

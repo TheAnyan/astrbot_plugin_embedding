@@ -40,14 +40,14 @@ class EmbeddingAdapter(Star):
         """可选择实现异步的插件初始化方法，当实例化该插件类之后会自动调用该方法。"""
         pass
 
-    async def get_dim_async(self):
+    async def get_embedding(self):
         """获取embedding向量"""
-        return await self.current_provider.get_dim_async()
+        return await self.current_provider.get_embedding()
 
 
-    async def get_dim(self):
+    async def get_dim_async(self):
         """获取embedding维数"""
-        return await self.current_provider.get_dim()
+        return await self.current_provider.get_dim_async()
 
 
     def get_model_name(self):

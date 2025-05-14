@@ -16,7 +16,7 @@ class Provider:
         self.url = config['api_url']
         self.model = config['embed_model']
 
-    async def get_dim(self) -> int:
+    async def get_dim_async(self) -> int:
         """获取embedding维数（异步版本）"""
         try:
             # 直接调用内部方法，绕过公开方法的异常处理

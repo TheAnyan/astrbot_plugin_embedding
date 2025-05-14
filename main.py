@@ -82,6 +82,8 @@ class EmbeddingAdapter(Star):
             self.config["whichprovider"]=name
             self.config.save_config()
             yield event.plain_result(f"已切换到服务商：{name}")
+        else:
+            yield event.plain_result(f"切换失败，不存在服务商：{name}")
 
     async def terminate(self):
         """可选择实现异步的插件销毁方法，当插件被卸载/停用时会调用。"""

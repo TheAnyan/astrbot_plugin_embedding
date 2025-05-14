@@ -11,7 +11,7 @@ from astrbot.api import logger
 from .provider_mapping import get_provider,PROVIDER_CLASS_MAP # 假设provider_mapping在同一目录
 
 
-@register("EmbeddingAdapter", "AnYan", "提供对各种服务商的embedding模型支持", "1.0.0")
+@register("astrbot_plugin_embedding_adapter", "AnYan", "提供对各种服务商的embedding模型支持", "1.0.0")
 class EmbeddingAdapter(Star):
     def __init__(self, context: Context, config: dict):
         super().__init__(context)

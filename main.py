@@ -77,8 +77,11 @@ class EmbeddingAdapter(Star):
     @embedding_manager.command("select")
     async def select_provider(self, event: AstrMessageEvent, name: str ):
         """切换当前服务商 /em select ollama"""
-        self.current_provider = self.providers[name]
-        return event.plain_result(f"已切换到服务商：{name}")
+        if name in self.providers:
+            self.current_provider = self.providers[name]
+            self.config["whichprovider"]=name
+            self.config.save_config()
+            yield event.plain_result(f"已切换到服务商：{name}")
 
     async def terminate(self):
         """可选择实现异步的插件销毁方法，当插件被卸载/停用时会调用。"""

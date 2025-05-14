@@ -16,6 +16,22 @@ class Provider:
         self.url = config['api_url']
         self.model = config['embed_model']
 
+    async def get_dim(self) -> int:
+        """获取embedding维数（异步版本）"""
+        try:
+            # 直接调用内部方法，绕过公开方法的异常处理
+            emb = await self._get_embedding(TEXT)
+            # 验证返回格式：非空列表且包含浮点数
+            return len(emb)
+        except httpx.HTTPStatusError as e:
+            logger.debug(f"服务不可用 HTTP {e.response.status_code}")
+            return False
+        except (httpx.RequestError, KeyError, ValueError, TypeError) as e:
+            logger.debug(f"服务检查失败: {type(e).__name__}")
+            return False
+        except Exception as e:
+            logger.error(f"未知错误: {str(e)}")
+            return False
 
 
     async def _get_embedding(self, text: str) -> Optional[list]:

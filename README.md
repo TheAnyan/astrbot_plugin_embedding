@@ -150,6 +150,12 @@ is_ok = await embedding_adapter.is_available_async()
 
 Embedding是计算机“理解“对话含义的重要步骤，对于一个QQbot来说，是一个很容易用到的功能。原本我把embedding适配的功能集成在我的第一个插件[赛博考古](https://github.com/TheAnyan/astrbot_plugin_cyber_archaeology)中，但我在安装[@lxfight](https://github.com/lxfight)的插件[astrbot_plugin_mnemosyne](https://github.com/lxfight/astrbot_plugin_mnemosyne)时，我发现需要重复配置Embedding的api，而且两个项目的Embedding支持的服务商都有欠缺。因此我决定拆分该功能，构建一个对主流Embedding服务商的适配器，统一加载Embedding服务，为后续项目提供支持。
 
+## 致谢
+
+感谢[@lxfight](https://github.com/lxfight)的插件项目[astrbot_plugin_mnemosyne](https://github.com/lxfight/astrbot_plugin_mnemosyne)带来的启发。
+
+感谢[@Yxiguan](https://github.com/Yxiguan)在插件项目[astrbot_plugin_mnemosyne]中提供的代码，本项目对Gemini支持来源于对他代码的复用。
+
 ## ⚠️ 注意事项
 1. 首次使用需部署embedding模型并进行相应配置
 

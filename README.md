@@ -1,4 +1,3 @@
-
 # EmbeddingAdapter 用于适配各种模型提供商
 
 [![License](https://img.shields.io/badge/License-AGPL%20v3-orange.svg)](https://opensource.org/licenses/AGPL-3.0) [![AstrBot](https://img.shields.io/badge/AstrBot-3.5%2B-blue.svg)](https://github.com/Soulter/AstrBot) ![Version](https://img.shields.io/badge/Version-1.0-success) [![GitHub](https://img.shields.io/badge/author-AnYan-blue)](https://github.com/TheAnyan)
@@ -19,7 +18,7 @@ astrbot插件市场搜索astrbot_plugin_embedding_adapter，点击安装，等�
 
 ### embedding 模型部署
 
-#### 在线Ollama服务部署（百度）
+#### 百度千帆API
 
 请参考百度[鉴权方式文档](https://cloud.baidu.com/doc/WENXINWORKSHOP/s/Dlkm79mnx#%E5%9F%BA%E4%BA%8E%E5%AE%89%E5%85%A8%E8%AE%A4%E8%AF%81aksk%E7%AD%BE%E5%90%8D%E8%AE%A1%E7%AE%97%E8%AE%A4%E8%AF%81)
 
@@ -31,33 +30,15 @@ astrbot插件市场搜索astrbot_plugin_embedding_adapter，点击安装，等�
 > 
 > 创建应用时请勾选你需要的模型，模型信息可以参考[百度千帆向量Embeddings](https://cloud.baidu.com/doc/WENXINWORKSHOP/s/alj562vvu)
 
-**embedding配置**
-
-请在astrbot面板配置，插件管理 -> astrbot_plugin_cyber_archaeology -> 操作 -> 插件配置
-
-进行五项配置：
-1. 调用embedding的provider (whichprovider)
-2. 在线api服务地址 (api_url)
-3. api_key
-4. secret_key
-5. Embedding模型名称 (embed_model)
 
 
-#### 在线Ollama服务部署（openai）
-> [!NOTE]
-> 
-> 由于作者没有办法访问openai，因此没有测试。
+
+#### Openai
+
+支持各种与Openai格式兼容的api
 
 
-**embedding配置**
-
-请在astrbot面板配置，插件管理 -> astrbot_plugin_cyber_archaeology -> 操作 -> 插件配置
-
-进行四项配置：
-1. 调用embedding的provider (whichprovider)
-2. 在线api服务地址 (api_url)
-3. api_key
-4. Embedding模型名称 (embed_model)四项
+#### Gemini
 
 
 
@@ -90,7 +71,7 @@ ollama pull your_model
 ```
 
 
-| 推荐模型                       | 功能描述                             | 大小     |
+| 推荐ollama模型                       | 功能描述                             | 大小     |
 |----------------------------|----------------------------------|--------|
 | nomic-embed-text        | 仅英文，Ollama排名第一                   | 274 MB |
 | quentinz/bge-small-zh-v1.5 | 针对中文优化的轻量级文本嵌入模型                 | 48 MB  |
@@ -104,10 +85,16 @@ ollama pull your_model
 
 | 方法名 | 参数 | 返回值 | 功能描述 |
 |-------|------|-------|---------|
-| `get_embedding(text)` | `str` | `List[float]` | 获取当前文本的embedding向量 |
-| `get_dim_async()` | 无 | `int` | 获取embedding向量的维度数 |
+| `get_embedding(text)` | `str` | `List[float]` | 获取当前文本的embedding向量（同步） |
+| `get_embeddings(texts)` | `List[str]` | `List[List[float]]` | 获取多个文本的embedding向量（同步） |
+| `get_dim()` | 无 | `int` | 获取embedding向量的维度数（同步） |
 | `get_model_name()` | 无 | `str` | 获取当前使用的embedding模型名称 |
 | `get_provider_name()` | 无 | `str` | 获取当前使用的服务商名称 |
+| `is_available()` | 无 | `bool` | 检查服务商是否可用（同步） |
+| `get_embedding_async(text)` | `str` | `List[float]` | 获取当前文本的embedding向量（异步） |
+| `get_embeddings_async(texts)` | `List[str]` | `List[List[float]]` | 获取多个文本的embedding向量（异步） |
+| `get_dim_async()` | 无 | `int` | 获取embedding向量的维度数（异步） |
+| `is_available_async()` | 无 | `bool` | 检查服务商是否可用（异步） |
 
 ## 插件调用方式
 在AstrBot插件系统中，可以通过以下方式获取插件实例并调用方法：
@@ -116,11 +103,19 @@ ollama pull your_model
 # 获取插件实例
 embedding_adapter = context.get_registered_star("astrbot_plugin_embedding_adapter").star_cls
 
-# 调用方法示例
-embedding_vector = await embedding_adapter.get_embedding()
-dimension = await embedding_adapter.get_dim_async()
+# 同步用法
+embedding_vector = embedding_adapter.get_embedding("hello world")
+embedding_vectors = embedding_adapter.get_embeddings(["hello", "world"])
+dimension = embedding_adapter.get_dim()
 model_name = embedding_adapter.get_model_name()
 provider_name = embedding_adapter.get_provider_name()
+is_ok = embedding_adapter.is_available()
+
+# 异步用法
+embedding_vector = await embedding_adapter.get_embedding_async("hello world")
+embedding_vectors = await embedding_adapter.get_embeddings_async(["hello", "world"])
+dimension = await embedding_adapter.get_dim_async()
+is_ok = await embedding_adapter.is_available_async()
 ```
 
 ## 当前支持的服务商

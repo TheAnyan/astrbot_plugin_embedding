@@ -3,6 +3,7 @@ main.py
 插件主程序
 """
 import asyncio
+from typing import Optional, List
 
 from astrbot.api.event import filter, AstrMessageEvent, MessageEventResult
 from astrbot.api.star import Context, Star, register
@@ -36,19 +37,19 @@ class EmbeddingAdapter(Star):
             self.current_provider = self.providers[config["whichprovider"]]
 
 
-    async def initialize(self):
-        """可选择实现异步的插件初始化方法，当实例化该插件类之后会自动调用该方法。"""
-        pass
+    
 
-    async def get_embedding(self,text:str):
+    def get_embedding(self, text: str):
         """获取embedding向量"""
-        return await self.current_provider.get_embedding(text)
+        return self.current_provider.get_embedding(text)
+    
+    def get_embeddings(self, texts: List[str]):
+        """获取embedding向量"""
+        return self.current_provider.get_embeddings(text)
 
-
-    async def get_dim_async(self):
+    def get_dim(self):
         """获取embedding维数"""
-        return await self.current_provider.get_dim_async()
-
+        return self.current_provider.get_dim()
 
     def get_model_name(self):
         """获取模型名字"""
@@ -57,6 +58,31 @@ class EmbeddingAdapter(Star):
     def get_provider_name(self):
         """获取provider名"""
         return self.current_provider.get_provider_name()
+    
+    def is_available(self):
+        """检查服务商是否可用"""
+        return self.current_provider.is_available()
+    
+
+
+    async def get_embedding_async(self, text:str):
+        """获取embedding向量"""
+        return await self.current_provider.get_embedding_async(text)
+    
+    async def get_embeddings_async(self, texts: List[str]):
+        """获取embedding向量"""
+        return await self.current_provider.get_embeddings_async(text)
+
+    async def get_dim_async(self):
+        """获取embedding维数"""
+        return await self.current_provider.get_dim_async()
+    
+    async def is_available_async(self):
+        """检查服务商是否可用"""
+        return await self.current_provider.is_available_async()
+    
+
+
 
     @filter.command_group("Embedding_Manager", alias={'em'})
     def embedding_manager(self):

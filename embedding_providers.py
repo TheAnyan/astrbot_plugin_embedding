@@ -3,33 +3,41 @@ embedding_providers.py
 实现对各个embedding服务商的支持
 """
 import httpx
+import requests
 import json
+import asyncio
+import openai
+from google import genai
+
 from datetime import datetime as dt
-from typing import Optional
+from typing import Optional, List
 from astrbot.api import logger
 
-TEXT="test"
+TEXT = "test"
 
 class Provider:
-    def __init__(self,config:dict) -> None:
+    def __init__(self, config: dict) -> None:
         self.config = config
-        self.url = config['api_url']
         self.model = config['embed_model']
 
-    async def get_dim_async(self) -> int:
-        """获取embedding维数（异步版本）"""
-        try:
-            # 直接调用内部方法，绕过公开方法的异常处理
-            emb = await self._get_embedding(TEXT)
-            # 验证返回格式：非空列表且包含浮点数
-            return len(emb)
-        except httpx.HTTPStatusError as e:
-            logger.debug(f"服务不可用 HTTP {e.response.status_code}")
-        except (httpx.RequestError, KeyError, ValueError, TypeError) as e:
-            logger.debug(f"服务检查失败: {type(e).__name__}")
-        except Exception as e:
-            logger.error(f"未知错误: {str(e)}")
 
+    def _get_embedding(self, text: str) -> Optional[list]:
+        """获取embedding(同步版本)"""
+
+        embeddings=self._get_embeddings([text])
+        return embeddings[0] if embeddings else None
+
+    def _get_embeddings(self, texts: List[str]) -> Optional[List[list]]:
+        """获取embedding(同步版本)"""
+        return NotImplementedError()
+    
+    async def _get_embedding_async(self, text: str) -> Optional[list]:
+        embeddings = await self._get_embeddings_async([text])
+        return embeddings[0] if embeddings else None
+    
+    async def _get_embeddings_async(self, texts: List[str]) -> Optional[List[list]]:
+        return self._get_embeddings(texts)
+    
 
     def get_model_name(self) -> int:
         """获取embeddingmodel"""
@@ -40,13 +48,10 @@ class Provider:
         return self.__class__.__name__
 
 
-    async def _get_embedding(self, text: str) -> Optional[list]:
-        return NotImplementedError()
-
-    async def get_embedding(self, text: str) -> Optional[list]:
-        """获取embedding（异步版本）"""
+    def get_embedding(self, text: str) -> Optional[list]:
+        """获取embedding(同步版本)"""
         try:
-            response = await self._get_embedding(text)
+            response = self._get_embedding(text)
             return response
         except httpx.HTTPStatusError as e:
             logger.error(f"API错误: {e.response.status_code} - {e.response.text}")
@@ -57,11 +62,75 @@ class Provider:
         except Exception as e:
             logger.error(f"未知错误: {str(e)}")
 
-    async def is_available(self) -> bool:
+    def get_embeddings(self, texts: List[str]) -> Optional[List[list]]:
+        """获取embedding(同步版本)"""
+        try:
+            response = self._get_embeddings(texts)
+            return response
+        except httpx.HTTPStatusError as e:
+            logger.error(f"API错误: {e.response.status_code} - {e.response.text}")
+        except httpx.RequestError as e:
+            logger.error(f"网络请求失败: {str(e)}")
+        except json.JSONDecodeError:
+            logger.error("响应数据解析失败")
+        except Exception as e:
+            logger.error(f"未知错误: {str(e)}")
+
+    def get_dim(self) -> int:
+        """获取embedding维数"""
+        # 直接调用内部方法，绕过公开方法的异常处理
+        emb = self._get_embedding(TEXT)
+        # 验证返回格式：非空列表且包含浮点数
+        return len(emb)
+
+
+    def is_available(self) -> bool:
+        """通过实际嵌入请求验证服务可用性"""
+        emb = self._get_embedding(TEXT)
+        # 验证返回格式：非空列表且包含浮点数
+        return bool(emb) and isinstance(emb, list)
+
+
+    async def get_embedding_async(self, text: str) -> Optional[list]:
+        """获取embedding(异步版本)"""
+        try:
+            response = await self._get_embedding_async(text)
+            return response
+        except httpx.HTTPStatusError as e:
+            logger.error(f"API错误: {e.response.status_code} - {e.response.text}")
+        except httpx.RequestError as e:
+            logger.error(f"网络请求失败: {str(e)}")
+        except json.JSONDecodeError:
+            logger.error("响应数据解析失败")
+        except Exception as e:
+            logger.error(f"未知错误: {str(e)}")
+
+    async def get_embeddings_async(self, texts: List[str]) -> Optional[List[list]]:
+        """获取embedding(异步版本)"""
+        try:
+            response = await self._get_embeddings_async(texts)
+            return response
+        except httpx.HTTPStatusError as e:
+            logger.error(f"API错误: {e.response.status_code} - {e.response.text}")
+        except httpx.RequestError as e:
+            logger.error(f"网络请求失败: {str(e)}")
+        except json.JSONDecodeError:
+            logger.error("响应数据解析失败")
+        except Exception as e:
+            logger.error(f"未知错误: {str(e)}")
+
+    async def get_dim_async(self) -> int:
+        """获取embedding维数(异步版本)"""
+        # 直接调用内部方法，绕过公开方法的异常处理
+        emb = await self._get_embedding_async(TEXT)
+        # 验证返回格式：非空列表且包含浮点数
+        return len(emb)
+
+    async def is_available_async(self) -> bool:
         """通过实际嵌入请求验证服务可用性"""
         try:
             # 直接调用内部方法，绕过公开方法的异常处理
-            emb = await self._get_embedding(TEXT)
+            emb = await self._get_embedding_async(TEXT)
             # 验证返回格式：非空列表且包含浮点数
             return bool(emb) and isinstance(emb, list)
         except httpx.HTTPStatusError as e:
@@ -77,17 +146,58 @@ class Provider:
 
 
 class BaiduProvider(Provider):
-    def __init__(self,config:dict) -> None:
+    def __init__(self, config: dict) -> None:
         super().__init__(config)
+        self.url = config['api_url']
         self.api_key = self.config["api_key"]
         self.secret_key = self.config["secret_key"]
-        self.token_timestamp=None
-        self.access_token=""
+        self.token_timestamp = None
+        self.access_token = ""
 
-    async def _get_embedding(self,text:str) -> Optional[list]:
-        """获取embedding（异步版本）"""
+
+    def _get_embeddings(self, texts: List[str]) -> Optional[List[list]]:
+        """获取embedding(同步版本)"""
+        if not self.access_token or not self.token_timestamp or abs((dt.now() - self.token_timestamp).days) >= 30:
+            self.access_token = self.get_access_token()
+        params = {"access_token": self.access_token}
+        payload = {"input": texts}
+        headers = {"Content-Type": "application/json"}
+        response = requests.post(
+            self.url + "/" + self.model,
+            headers=headers, params=params, json=payload, timeout=30)
+        response.raise_for_status()
+        return [itm["embedding"] for itm in response.json()["data"]]
+
+    def get_access_token(self) -> Optional[str]:
+        """同步获取Access Token"""
+        auth_url = "https://aip.baidubce.com/oauth/2.0/token"
+        params = {
+            "grant_type": "client_credentials",
+            "client_id": self.api_key,
+            "client_secret": self.secret_key,
+        }
+        headers = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+        try:
+            response = requests.get(auth_url, params=params, headers=headers, timeout=30)
+            response.raise_for_status()
+            self.token_timestamp = dt.now()
+            return response.json()["access_token"]
+        except requests.HTTPError as e:
+            logger.error(f"百度千帆鉴权失败 HTTP错误: {e.response.status_code}")
+        except requests.RequestException as e:
+            logger.error(f"错误详情: {str(e)}")
+        except KeyError:
+            logger.error("响应缺少access_token字段")
+        return None
+
+
+    async def _get_embeddings_async(self, text: List[str]) -> Optional[List[list]]:
+        """获取embedding(异步版本)"""
         if not self.access_token or abs((dt.now() - self.token_timestamp).days) >= 30:
-            self.access_token = await self.get_access_token()
+            self.access_token = await self.get_access_token_async()
         async with httpx.AsyncClient(timeout=30) as client:
             params = {"access_token": self.access_token}
             payload = {"input": [text]}
@@ -96,11 +206,11 @@ class BaiduProvider(Provider):
                 self.url + "/" + self.model,
                 headers=headers, params=params, json=payload)
             response.raise_for_status()  # 自动处理4xx/5xx状态码
-            return response.json()["data"][0]["embedding"]
+            return [itm["embedding"] for itm in response.json()["data"]]
 
 
-    async def get_access_token(self) -> Optional[str]:
-        """异步获取Access Token（有效期30天）"""
+    async def get_access_token_async(self) -> Optional[str]:
+        """异步获取Access Token(有效期30天)"""
         auth_url = "https://aip.baidubce.com/oauth/2.0/token"
         params = {
             "grant_type": "client_credentials",
@@ -115,7 +225,7 @@ class BaiduProvider(Provider):
             async with httpx.AsyncClient(timeout=30) as client:
                 response = await client.get(auth_url, params=params, headers=headers)
                 response.raise_for_status()
-                self.token_timestamp=dt.now()
+                self.token_timestamp = dt.now()
                 return response.json()["access_token"]
         except httpx.HTTPStatusError as e:
             logger.error(f"百度千帆鉴权失败 HTTP错误: {e.response.status_code}")
@@ -125,39 +235,47 @@ class BaiduProvider(Provider):
             logger.error("响应缺少access_token字段")
         return None
 
-
-
 class OpenaiProvider(Provider):
-    def __init__(self,config:dict) -> None:
+    def __init__(self, config: dict) -> None:
         super().__init__(config)
+        self.url = config['api_url']
         self.api_key = self.config["api_key"]
 
-
-    async def _get_embedding(self,text:str) -> Optional[list]:
-        async with httpx.AsyncClient(timeout=30) as client:
-            headers = {
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {self.api_key}"
-            }
-            payload = {
-                "model": self.model,
-                "input": text.replace("\n", " ")
-            }
-            response = await client.post(self.url, headers=headers,
-                                         json=payload)
-            response.raise_for_status()  # 自动处理4xx/5xx状态码
-            return response.json()["data"][0]["embedding"]
+        self.client = openai.OpenAI(api_key=self.api_key, base_url=self.url)
 
 
+    def _get_embeddings(self, texts: List[str]) -> Optional[List[list]]:
+        # 使用 openai 库同步获取多个 embedding
+        response = self.client.embeddings.create(input=texts, model=self.model)
+        return [item["embedding"] for item in response["data"]]
 
 
 class OllamaProvider(Provider):
-    def __init__(self,config:dict) -> None:
+    def __init__(self, config: dict) -> None:
         super().__init__(config)
+        self.url = config['api_url']
 
+    def _get_embedding(self, text: str) -> Optional[list]:
+        response = requests.post(
+            f"{self.url}/api/embeddings",
+            json={
+                "model": self.model,
+                "prompt": text
+            },
+            timeout=30
+        )
+        response.raise_for_status()
+        return response.json()["embedding"]
 
-    async def _get_embedding(self, text: str) -> Optional[list]:
-        """获取embedding（异步版本）"""
+    def _get_embeddings(self, texts: List[str]) -> Optional[List[list]]:
+        # Ollama API 不支持批量，逐条处理
+        results = []
+        for text in texts:
+            results.append(self._get_embedding(text))
+        return results
+
+    async def _get_embedding_async(self, text: str) -> Optional[list]:
+        """获取embedding(异步版本)"""
         async with httpx.AsyncClient(timeout=30) as client:
             response = await client.post(
                 f"{self.url}/api/embeddings",
@@ -168,15 +286,42 @@ class OllamaProvider(Provider):
             )
             response.raise_for_status()  # 自动处理4xx/5xx状态码
             return response.json()["embedding"]
+        
+    async def _get_embeddings_async(self, texts: List[str]) -> Optional[List[list]]:
+        # Ollama API 不支持批量，逐条处理
+        async with httpx.AsyncClient(timeout=30) as client:
+            tasks = []
+            for text in texts:
+                tasks.append(
+                    client.post(
+                        f"{self.url}/api/embeddings",
+                        json={
+                            "model": self.model,
+                            "prompt": text
+                        }
+                    )
+                )
+            responses = await asyncio.gather(*tasks)
+            return [response.json()["embedding"] for response in responses if response.status_code == 200]
 
-    async def is_available(self) -> bool:
-        """Ollama双重验证：服务在线+模型有效"""
+    async def is_available_async(self) -> bool:
+        """Ollama双重验证:服务在线+模型有效"""
         try:
             # 先验证服务端点可达性
             async with httpx.AsyncClient(timeout=5) as client:
                 await client.get(f"{self.url}/api/tags")
             # 再验证模型响应能力
-            return await super().is_available()
+            return await super().is_available_async()
         except httpx.RequestError:
             return False
 
+class GeminiProvider(Provider):
+    def __init__(self, config: dict) -> None:
+        super().__init__(config)
+        self.api_key = self.config["api_key"]
+        self.model = self.config["embed_model"]
+        self.client = genai.Client(api_key=self.api_key)
+
+    def _get_embeddings(self, texts: List[str]) -> Optional[List[list]]:
+        response = self.client.models.embed_content(model=self.model, contents=texts)
+        return [embedding.values for embedding in response.embeddings]

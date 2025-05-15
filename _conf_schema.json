@@ -47,6 +47,20 @@
         }
       }
     },
+    "gemini":{
+      "type": "object",
+      "description": "百度千帆",
+      "items": {
+        "api_key": {
+          "type": "string",
+          "description": "api_key"
+        },
+        "embed_model": {
+          "type": "string",
+          "description": "Embedding模型名称"
+        }
+      }
+    },
     "ollama":{
       "type": "object",
       "description": "Ollama",

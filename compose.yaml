@@ -1,0 +1,22 @@
+version: '3.5'
+
+services:
+
+##################### 使用ollama部署大模型 #####################
+
+# OLLAMA_HOST       The host:port to bind to (default "127.0.0.1:11434")
+# OLLAMA_ORIGINS    A comma separated list of allowed origins.
+# OLLAMA_MODELS     The path to the models directory (default is "~/.ollama/models")
+
+  ollama:
+    restart: always
+    container_name: 11434-ollama
+    image: ollama/ollama
+    ports:
+      - 11434:11434
+    environment:
+      - OLLAMA_MODELS=/data/models
+    volumes:
+      - /your/path/to/models/:/data/models #你保存模型的位置，需要自己修改
+    # 命令启动 serve
+    command: serve

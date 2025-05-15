@@ -98,14 +98,40 @@ ollama pull your_model
 
 
 
-**embedding配置**
+## 🔌 接口信息
 
-请在astrbot面板配置，插件管理 -> astrbot_plugin_embedding_adapter -> 操作 -> 插件配置
+### 核心接口方法
 
-进行三项配置：
-1. embedding的provider (whichprovider)
-2. Ollama服务地址 (ollama_api_url)
-3. Embedding模型名称 (embed_model)
+| 方法名 | 参数 | 返回值 | 功能描述 |
+|-------|------|-------|---------|
+| `get_embedding(text)` | `str` | `List[float]` | 获取当前文本的embedding向量 |
+| `get_dim_async()` | 无 | `int` | 获取embedding向量的维度数 |
+| `get_model_name()` | 无 | `str` | 获取当前使用的embedding模型名称 |
+| `get_provider_name()` | 无 | `str` | 获取当前使用的服务商名称 |
+
+## 插件调用方式
+在AstrBot插件系统中，可以通过以下方式获取插件实例并调用方法：
+
+```python
+# 获取插件实例
+embedding_adapter = context.get_registered_star("astrbot_plugin_embedding_adapter").star_cls
+
+# 调用方法示例
+embedding_vector = await embedding_adapter.get_embedding()
+dimension = await embedding_adapter.get_dim_async()
+model_name = embedding_adapter.get_model_name()
+provider_name = embedding_adapter.get_provider_name()
+```
+
+## 当前支持的服务商
+1. 百度千帆 (`baidu`)
+   • 需要配置: `api_url`, `api_key`, `secret_key`, `embed_model`
+
+2. OpenAI (`openai`)
+   • 需要配置: `api_url`, `api_key`, `embed_model`
+
+3. Ollama本地服务 (`ollama`)
+   • 需要配置: `ollama_api_url`, `embed_model`
 
 
 ## 🛠️ 使用指南
@@ -115,8 +141,6 @@ ollama pull your_model
 | `/em ls`                     | 列出可以选择的提供商，检验可用性 | `/em ls`           |
 | `/em select <provider_name>` | 清空所有群组记录(管理员权限)       | `/em select baidu` |
 
-
-## 🧠 实现原理
 
 
 ## ⚠️ 注意事项

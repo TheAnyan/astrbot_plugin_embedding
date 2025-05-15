@@ -40,9 +40,9 @@ class EmbeddingAdapter(Star):
         """可选择实现异步的插件初始化方法，当实例化该插件类之后会自动调用该方法。"""
         pass
 
-    async def get_embedding(self):
+    async def get_embedding(self,text:str):
         """获取embedding向量"""
-        return await self.current_provider.get_embedding()
+        return await self.current_provider.get_embedding(text)
 
 
     async def get_dim_async(self):
@@ -83,9 +83,9 @@ class EmbeddingAdapter(Star):
             except Exception as e:
                 logger.error(f"检查服务商 {name} 状态失败: {str(e)}")
                 is_available = "(状态未知)"
-
+            model=provider.get_model_name()
             current_flag = "[√]" if provider == self.current_provider else "[  ]"
-            reply_list.append(f"{current_flag} {name} {is_available}")
+            reply_list.append(f"{current_flag} {name} {model} {is_available}")
 
         # 格式化输出
         yield event.plain_result("\n".join(reply_list))
@@ -98,7 +98,7 @@ class EmbeddingAdapter(Star):
         if name in self.providers:
             self.current_provider = self.providers[name]
             self.config["whichprovider"]=name
-            self.config.save_config()
+            # self.config.save_config()
             yield event.plain_result(f"已切换到服务商：{name}")
         else:
             yield event.plain_result(f"切换失败，不存在服务商：{name}")

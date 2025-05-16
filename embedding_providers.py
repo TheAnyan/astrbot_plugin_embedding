@@ -177,6 +177,9 @@ class BaiduProvider(Provider):
             self.url + "/" + self.model,
             headers=headers, params=params, json=payload, timeout=30)
         response.raise_for_status()
+        if "error_code" in resp_json:
+            logger.error(f"百度千帆接口错误: {resp_json}")
+            raise RuntimeError(f"Baidu Qianfan error: {resp_json.get('error_msg', 'Unknown error')}")
         return [itm["embedding"] for itm in response.json()["data"]]
 
     def get_access_token(self) -> Optional[str]:
@@ -205,18 +208,22 @@ class BaiduProvider(Provider):
         return None
 
 
-    async def _get_embeddings_async(self, text: List[str]) -> Optional[List[list]]:
+    async def _get_embeddings_async(self, textS: List[str]) -> Optional[List[list]]:
         """获取embedding(异步版本)"""
         if not self.access_token or abs((dt.now() - self.token_timestamp).days) >= 30:
             self.access_token = await self.get_access_token_async()
         async with httpx.AsyncClient(timeout=30) as client:
             params = {"access_token": self.access_token}
-            payload = {"input": [text]}
+            payload = {"input": textS}
             headers = {"Content-Type": "application/json"}
             response = await client.post(
                 self.url + "/" + self.model,
                 headers=headers, params=params, json=payload)
             response.raise_for_status()  # 自动处理4xx/5xx状态码
+            if "error_code" in resp_json:
+                logger.error(f"百度千帆接口错误: {resp_json}")
+                raise RuntimeError(f"Baidu Qianfan error: {resp_json.get('error_msg', 'Unknown error')}")
+        
             return [itm["embedding"] for itm in response.json()["data"]]
 
 

@@ -96,7 +96,7 @@ class EmbeddingAdapter(Star):
             yield event.plain_result("未配置任何有效的embedding服务商")
 
         availability_tasks = {
-            name: provider.is_available()
+            name: provider.is_available_async()
             for name, provider in self.providers.items()
         }
         results = await asyncio.gather(*availability_tasks.values(), return_exceptions=True)

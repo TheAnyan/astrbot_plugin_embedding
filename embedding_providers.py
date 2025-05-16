@@ -24,7 +24,6 @@ class Provider:
 
     def _get_embedding(self, text: str) -> Optional[list]:
         """获取embedding(同步版本)"""
-
         embeddings=self._get_embeddings([text])
         return embeddings[0] if embeddings else None
 
@@ -69,9 +68,15 @@ class Provider:
 
     def get_embeddings(self, texts: List[str]) -> Optional[List[list]]:
         """获取embedding(同步版本)"""
+        batch_size = 16
+        all_embeddings = []
         try:
-            response = self._get_embeddings(texts)
-            return response
+            for i in range(0, len(texts), batch_size):
+                batch = texts[i:i + batch_size]
+                response = self._get_embeddings(batch)
+                if response:
+                    all_embeddings.extend(response)
+            return all_embeddings
         except requests.exceptions.Timeout:
             logger.error(f"[{self.get_provider_name()}] 请求超时")
         except requests.exceptions.ConnectionError:
@@ -126,9 +131,15 @@ class Provider:
 
     async def get_embeddings_async(self, texts: List[str]) -> Optional[List[list]]:
         """获取embedding(异步版本)"""
+        batch_size = 16
+        all_embeddings = []
         try:
-            response = await self._get_embeddings_async(texts)
-            return response
+            for i in range(0, len(texts), batch_size):
+                batch = texts[i:i + batch_size]
+                response = await self._get_embeddings_async(batch)
+                if response:
+                    all_embeddings.extend(response)
+            return all_embeddings
         except httpx.HTTPStatusError as e:
             logger.error(f"[{self.get_provider_name()}] API错误: {e.response.status_code} - {e.response.text}")
         except httpx.RequestError as e:
@@ -220,13 +231,13 @@ class BaiduProvider(Provider):
         return None
 
 
-    async def _get_embeddings_async(self, textS: List[str]) -> Optional[List[list]]:
+    async def _get_embeddings_async(self, texts: List[str]) -> Optional[List[list]]:
         """获取embedding(异步版本)"""
         if not self.access_token or abs((dt.now() - self.token_timestamp).days) >= 30:
             self.access_token = await self.get_access_token_async()
         async with httpx.AsyncClient(timeout=30) as client:
             params = {"access_token": self.access_token}
-            payload = {"input": textS}
+            payload = {"input": texts}
             headers = {"Content-Type": "application/json"}
             response = await client.post(
                 self.url + "/" + self.model,

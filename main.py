@@ -71,7 +71,7 @@ class EmbeddingAdapter(Star):
     
     async def get_embeddings_async(self, texts: List[str]):
         """获取embedding向量"""
-        return await self.current_provider.get_embeddings_async(text)
+        return await self.current_provider.get_embeddings_async(texts)
 
     async def get_dim_async(self):
         """获取embedding维数"""

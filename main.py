@@ -100,7 +100,6 @@ class EmbeddingAdapter(Star):
             for name, provider in self.providers.items()
         }
         results = await asyncio.gather(*availability_tasks.values(), return_exceptions=True)
-
         # 构建状态信息
         reply_list=[]
         for (name, provider), available in zip(self.providers.items(), results):

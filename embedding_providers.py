@@ -94,11 +94,15 @@ class Provider:
 
     def is_available(self) -> bool:
         """通过实际嵌入请求验证服务可用性"""
-        emb = self.get_embedding(TEXT)
-        if bool(emb) and isinstance(emb, list):
-            self.dim = len(emb)
-            return True
-        else:
+        try:
+            emb = self.get_embedding(TEXT)
+            if bool(emb) and isinstance(emb, list):
+                self.dim = len(emb)
+                return True
+            else:
+                return False
+        except Exception as e:
+            logger.error(f"服务可用性检测异常: {str(e)}")
             return False
 
 
@@ -155,12 +159,16 @@ class Provider:
 
     async def is_available_async(self) -> bool:
         """通过实际嵌入请求验证服务可用性"""
-        emb = await self._et_embedding_async(TEXT)
-        # 验证返回格式：非空列表且包含浮点数
-        if bool(emb) and isinstance(emb, list):
-            self.dim = len(emb)
-            return True
-        else:
+        try:
+            emb = await self._get_embedding_async(TEXT)
+            # 验证返回格式：非空列表且包含浮点数
+            if bool(emb) and isinstance(emb, list):
+                self.dim = len(emb)
+                return True
+            else:
+                return False
+        except Exception as e:
+            logger.error(f"服务可用性检测异常: {str(e)}")
             return False
 
 

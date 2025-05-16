@@ -1,5 +1,5 @@
 name: astrbot_plugin_embedding_adapter # 这是你的插件的唯一识别名。
 desc: embedding服务适配器，支持openai，ollama，baidu多平台。 # 插件简短描述
-version: v1.0 # 插件版本号。格式：v1.1.1 或者 v1.1
+version: v1.0.1 # 插件版本号。格式：v1.1.1 或者 v1.1
 author: AnYan # 作者
 repo: https://github.com/TheAnyan/astrbot_plugin_embedding_adapter # 插件的仓库地址

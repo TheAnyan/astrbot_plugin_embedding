@@ -53,10 +53,14 @@ class Provider:
         try:
             response = self._get_embedding(text)
             return response
-        except httpx.HTTPStatusError as e:
-            logger.error(f"API错误: {e.response.status_code} - {e.response.text}")
-        except httpx.RequestError as e:
-            logger.error(f"网络请求失败: {str(e)}")
+        except requests.exceptions.Timeout:
+            print("请求超时")
+        except requests.exceptions.ConnectionError:
+            print("连接错误")
+        except requests.exceptions.SSLError:
+            print("SSL证书验证失败")
+        except requests.exceptions.RequestException as e:
+            print("请求发生异常:", e)
         except json.JSONDecodeError:
             logger.error("响应数据解析失败")
         except Exception as e:
@@ -67,10 +71,14 @@ class Provider:
         try:
             response = self._get_embeddings(texts)
             return response
-        except httpx.HTTPStatusError as e:
-            logger.error(f"API错误: {e.response.status_code} - {e.response.text}")
-        except httpx.RequestError as e:
-            logger.error(f"网络请求失败: {str(e)}")
+        except requests.exceptions.Timeout:
+            print("请求超时")
+        except requests.exceptions.ConnectionError:
+            print("连接错误")
+        except requests.exceptions.SSLError:
+            print("SSL证书验证失败")
+        except requests.exceptions.RequestException as e:
+            print("请求发生异常:", e)
         except json.JSONDecodeError:
             logger.error("响应数据解析失败")
         except Exception as e:
@@ -78,15 +86,14 @@ class Provider:
 
     def get_dim(self) -> int:
         """获取embedding维数"""
-        # 直接调用内部方法，绕过公开方法的异常处理
-        emb = self._get_embedding(TEXT)
+        emb = self.get_embedding(TEXT)
         # 验证返回格式：非空列表且包含浮点数
         return len(emb)
 
 
     def is_available(self) -> bool:
         """通过实际嵌入请求验证服务可用性"""
-        emb = self._get_embedding(TEXT)
+        emb = self.get_embedding(TEXT)
         # 验证返回格式：非空列表且包含浮点数
         return bool(emb) and isinstance(emb, list)
 
@@ -100,6 +107,14 @@ class Provider:
             logger.error(f"API错误: {e.response.status_code} - {e.response.text}")
         except httpx.RequestError as e:
             logger.error(f"网络请求失败: {str(e)}")
+        except requests.exceptions.Timeout:
+            print("请求超时")
+        except requests.exceptions.ConnectionError:
+            print("连接错误")
+        except requests.exceptions.SSLError:
+            print("SSL证书验证失败")
+        except requests.exceptions.RequestException as e:
+            print("请求发生异常:", e)
         except json.JSONDecodeError:
             logger.error("响应数据解析失败")
         except Exception as e:
@@ -114,6 +129,14 @@ class Provider:
             logger.error(f"API错误: {e.response.status_code} - {e.response.text}")
         except httpx.RequestError as e:
             logger.error(f"网络请求失败: {str(e)}")
+        except requests.exceptions.Timeout:
+            print("请求超时")
+        except requests.exceptions.ConnectionError:
+            print("连接错误")
+        except requests.exceptions.SSLError:
+            print("SSL证书验证失败")
+        except requests.exceptions.RequestException as e:
+            print("请求发生异常:", e)
         except json.JSONDecodeError:
             logger.error("响应数据解析失败")
         except Exception as e:
@@ -121,27 +144,15 @@ class Provider:
 
     async def get_dim_async(self) -> int:
         """获取embedding维数(异步版本)"""
-        # 直接调用内部方法，绕过公开方法的异常处理
-        emb = await self._get_embedding_async(TEXT)
+        emb = await self.get_embedding_async(TEXT)
         # 验证返回格式：非空列表且包含浮点数
         return len(emb)
 
     async def is_available_async(self) -> bool:
         """通过实际嵌入请求验证服务可用性"""
-        try:
-            # 直接调用内部方法，绕过公开方法的异常处理
-            emb = await self._get_embedding_async(TEXT)
-            # 验证返回格式：非空列表且包含浮点数
-            return bool(emb) and isinstance(emb, list)
-        except httpx.HTTPStatusError as e:
-            logger.debug(f"服务不可用 HTTP {e.response.status_code}")
-            return False
-        except (httpx.RequestError, KeyError, ValueError, TypeError) as e:
-            logger.debug(f"服务检查失败: {type(e).__name__}")
-            return False
-        except Exception as e:
-            logger.error(f"未知错误: {str(e)}")
-            return False
+        emb = await self._et_embedding_async(TEXT)
+        # 验证返回格式：非空列表且包含浮点数
+        return bool(emb) and isinstance(emb, list)
 
 
 

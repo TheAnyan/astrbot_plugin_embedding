@@ -54,13 +54,13 @@ class Provider:
             response = self._get_embedding(text)
             return response
         except requests.exceptions.Timeout:
-            print("请求超时")
+            logger.error("请求超时")
         except requests.exceptions.ConnectionError:
-            print("连接错误")
+            logger.error("连接错误")
         except requests.exceptions.SSLError:
-            print("SSL证书验证失败")
+            logger.error("SSL证书验证失败")
         except requests.exceptions.RequestException as e:
-            print("请求发生异常:", e)
+            logger.error(f"请求发生异常:{str(e)}")
         except json.JSONDecodeError:
             logger.error("响应数据解析失败")
         except Exception as e:
@@ -72,13 +72,13 @@ class Provider:
             response = self._get_embeddings(texts)
             return response
         except requests.exceptions.Timeout:
-            print("请求超时")
+            logger.error("请求超时")
         except requests.exceptions.ConnectionError:
-            print("连接错误")
+            logger.error("连接错误")
         except requests.exceptions.SSLError:
-            print("SSL证书验证失败")
+            logger.error("SSL证书验证失败")
         except requests.exceptions.RequestException as e:
-            print("请求发生异常:", e)
+            logger.error(f"请求发生异常:{str(e)}")
         except json.JSONDecodeError:
             logger.error("响应数据解析失败")
         except Exception as e:
@@ -108,13 +108,13 @@ class Provider:
         except httpx.RequestError as e:
             logger.error(f"网络请求失败: {str(e)}")
         except requests.exceptions.Timeout:
-            print("请求超时")
+            logger.error("请求超时")
         except requests.exceptions.ConnectionError:
-            print("连接错误")
+            logger.error("连接错误")
         except requests.exceptions.SSLError:
-            print("SSL证书验证失败")
+            logger.error("SSL证书验证失败")
         except requests.exceptions.RequestException as e:
-            print("请求发生异常:", e)
+            logger.error(f"请求发生异常:{str(e)}")
         except json.JSONDecodeError:
             logger.error("响应数据解析失败")
         except Exception as e:
@@ -130,13 +130,13 @@ class Provider:
         except httpx.RequestError as e:
             logger.error(f"网络请求失败: {str(e)}")
         except requests.exceptions.Timeout:
-            print("请求超时")
+            logger.error("请求超时")
         except requests.exceptions.ConnectionError:
-            print("连接错误")
+            logger.error("连接错误")
         except requests.exceptions.SSLError:
-            print("SSL证书验证失败")
+            logger.error("SSL证书验证失败")
         except requests.exceptions.RequestException as e:
-            print("请求发生异常:", e)
+            logger.error(f"请求发生异常:{str(e)}")
         except json.JSONDecodeError:
             logger.error("响应数据解析失败")
         except Exception as e:

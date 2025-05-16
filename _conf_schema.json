@@ -49,7 +49,7 @@
     },
     "gemini":{
       "type": "object",
-      "description": "百度千帆",
+      "description": "Gemini",
       "items": {
         "api_key": {
           "type": "string",

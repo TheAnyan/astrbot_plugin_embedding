@@ -19,6 +19,7 @@ class Provider:
     def __init__(self, config: dict) -> None:
         self.config = config
         self.model = config['embed_model']
+        self.dim:Optional[int] = None 
 
 
     def _get_embedding(self, text: str) -> Optional[list]:
@@ -86,16 +87,20 @@ class Provider:
 
     def get_dim(self) -> int:
         """获取embedding维数"""
-        emb = self.get_embedding(TEXT)
+        self.is_available()
         # 验证返回格式：非空列表且包含浮点数
-        return len(emb)
+        return self.dim
 
 
     def is_available(self) -> bool:
         """通过实际嵌入请求验证服务可用性"""
         emb = self.get_embedding(TEXT)
-        # 验证返回格式：非空列表且包含浮点数
-        return bool(emb) and isinstance(emb, list)
+        if bool(emb) and isinstance(emb, list):
+            self.dim = len(emb)
+            return True
+        else:
+            return False
+
 
 
     async def get_embedding_async(self, text: str) -> Optional[list]:
@@ -144,15 +149,20 @@ class Provider:
 
     async def get_dim_async(self) -> int:
         """获取embedding维数(异步版本)"""
-        emb = await self.get_embedding_async(TEXT)
+        await self.is_available_async()
         # 验证返回格式：非空列表且包含浮点数
-        return len(emb)
+        return self.dim
 
     async def is_available_async(self) -> bool:
         """通过实际嵌入请求验证服务可用性"""
         emb = await self._et_embedding_async(TEXT)
         # 验证返回格式：非空列表且包含浮点数
-        return bool(emb) and isinstance(emb, list)
+        if bool(emb) and isinstance(emb, list):
+            self.dim = len(emb)
+            return True
+        else:
+            return False
+
 
 
 

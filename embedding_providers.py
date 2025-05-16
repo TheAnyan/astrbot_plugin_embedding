@@ -177,10 +177,11 @@ class BaiduProvider(Provider):
             self.url + "/" + self.model,
             headers=headers, params=params, json=payload, timeout=30)
         response.raise_for_status()
+        resp_json = response.json()
         if "error_code" in resp_json:
             logger.error(f"百度千帆接口错误: {resp_json}")
             raise RuntimeError(f"Baidu Qianfan error: {resp_json.get('error_msg', 'Unknown error')}")
-        return [itm["embedding"] for itm in response.json()["data"]]
+        return [itm["embedding"] for itm in resp_json["data"]]
 
     def get_access_token(self) -> Optional[str]:
         """同步获取Access Token"""
@@ -220,11 +221,12 @@ class BaiduProvider(Provider):
                 self.url + "/" + self.model,
                 headers=headers, params=params, json=payload)
             response.raise_for_status()  # 自动处理4xx/5xx状态码
+            resp_json = response.json()
             if "error_code" in resp_json:
                 logger.error(f"百度千帆接口错误: {resp_json}")
                 raise RuntimeError(f"Baidu Qianfan error: {resp_json.get('error_msg', 'Unknown error')}")
         
-            return [itm["embedding"] for itm in response.json()["data"]]
+            return [itm["embedding"] for itm in resp_json["data"]]
 
 
     async def get_access_token_async(self) -> Optional[str]:

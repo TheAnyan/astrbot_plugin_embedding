@@ -88,21 +88,16 @@ class Provider:
     def get_dim(self) -> int:
         """获取embedding维数"""
         self.is_available()
-        # 验证返回格式：非空列表且包含浮点数
         return self.dim
 
 
     def is_available(self) -> bool:
         """通过实际嵌入请求验证服务可用性"""
-        try:
-            emb = self.get_embedding(TEXT)
-            if bool(emb) and isinstance(emb, list):
-                self.dim = len(emb)
-                return True
-            else:
-                return False
-        except Exception as e:
-            logger.error(f"服务可用性检测异常: {str(e)}")
+        emb = self.get_embedding(TEXT)
+        if bool(emb) and isinstance(emb, list):
+            self.dim = len(emb)
+            return True
+        else:
             return False
 
 
@@ -159,17 +154,15 @@ class Provider:
 
     async def is_available_async(self) -> bool:
         """通过实际嵌入请求验证服务可用性"""
-        try:
-            emb = await self._get_embedding_async(TEXT)
-            # 验证返回格式：非空列表且包含浮点数
-            if bool(emb) and isinstance(emb, list):
-                self.dim = len(emb)
-                return True
-            else:
-                return False
-        except Exception as e:
-            logger.error(f"服务可用性检测异常: {str(e)}")
+
+        emb = await self.get_embedding_async(TEXT)
+        # 验证返回格式：非空列表且包含浮点数
+        if bool(emb) and isinstance(emb, list):
+            self.dim = len(emb)
+            return True
+        else:
             return False
+
 
 
 

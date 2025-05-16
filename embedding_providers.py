@@ -55,17 +55,17 @@ class Provider:
             response = self._get_embedding(text)
             return response
         except requests.exceptions.Timeout:
-            logger.error("请求超时")
+            logger.error(f"[{self.get_provider_name()}] 请求超时")
         except requests.exceptions.ConnectionError:
-            logger.error("连接错误")
+            logger.error(f"[{self.get_provider_name()}] 连接错误")
         except requests.exceptions.SSLError:
-            logger.error("SSL证书验证失败")
+            logger.error(f"[{self.get_provider_name()}] SSL证书验证失败")
         except requests.exceptions.RequestException as e:
-            logger.error(f"请求发生异常:{str(e)}")
+            logger.error(f"[{self.get_provider_name()}] 请求发生异常:{str(e)}")
         except json.JSONDecodeError:
-            logger.error("响应数据解析失败")
+            logger.error(f"[{self.get_provider_name()}] 响应数据解析失败")
         except Exception as e:
-            logger.error(f"未知错误: {str(e)}")
+            logger.error(f"[{self.get_provider_name()}] 未知错误: {str(e)}")
 
     def get_embeddings(self, texts: List[str]) -> Optional[List[list]]:
         """获取embedding(同步版本)"""
@@ -73,17 +73,17 @@ class Provider:
             response = self._get_embeddings(texts)
             return response
         except requests.exceptions.Timeout:
-            logger.error("请求超时")
+            logger.error(f"[{self.get_provider_name()}] 请求超时")
         except requests.exceptions.ConnectionError:
-            logger.error("连接错误")
+            logger.error(f"[{self.get_provider_name()}] 连接错误")
         except requests.exceptions.SSLError:
-            logger.error("SSL证书验证失败")
+            logger.error(f"[{self.get_provider_name()}] SSL证书验证失败")
         except requests.exceptions.RequestException as e:
-            logger.error(f"请求发生异常:{str(e)}")
+            logger.error(f"[{self.get_provider_name()}] 请求发生异常:{str(e)}")
         except json.JSONDecodeError:
-            logger.error("响应数据解析失败")
+            logger.error(f"[{self.get_provider_name()}] 响应数据解析失败")
         except Exception as e:
-            logger.error(f"未知错误: {str(e)}")
+            logger.error(f"[{self.get_provider_name()}] 未知错误: {str(e)}")
 
     def get_dim(self) -> int:
         """获取embedding维数"""
@@ -113,21 +113,21 @@ class Provider:
             response = await self._get_embedding_async(text)
             return response
         except httpx.HTTPStatusError as e:
-            logger.error(f"API错误: {e.response.status_code} - {e.response.text}")
+            logger.error(f"[{self.get_provider_name()}] API错误: {e.response.status_code} - {e.response.text}")
         except httpx.RequestError as e:
-            logger.error(f"网络请求失败: {str(e)}")
+            logger.error(f"[{self.get_provider_name()}] 网络请求失败: {str(e)}")
         except requests.exceptions.Timeout:
-            logger.error("请求超时")
+            logger.error(f"[{self.get_provider_name()}] 请求超时")
         except requests.exceptions.ConnectionError:
-            logger.error("连接错误")
+            logger.error(f"[{self.get_provider_name()}] 连接错误")
         except requests.exceptions.SSLError:
-            logger.error("SSL证书验证失败")
+            logger.error(f"[{self.get_provider_name()}] SSL证书验证失败")
         except requests.exceptions.RequestException as e:
-            logger.error(f"请求发生异常:{str(e)}")
+            logger.error(f"[{self.get_provider_name()}] 请求发生异常:{str(e)}")
         except json.JSONDecodeError:
-            logger.error("响应数据解析失败")
+            logger.error(f"[{self.get_provider_name()}] 响应数据解析失败")
         except Exception as e:
-            logger.error(f"未知错误: {str(e)}")
+            logger.error(f"[{self.get_provider_name()}] 未知错误: {str(e)}")
 
     async def get_embeddings_async(self, texts: List[str]) -> Optional[List[list]]:
         """获取embedding(异步版本)"""
@@ -135,21 +135,21 @@ class Provider:
             response = await self._get_embeddings_async(texts)
             return response
         except httpx.HTTPStatusError as e:
-            logger.error(f"API错误: {e.response.status_code} - {e.response.text}")
+            logger.error(f"[{self.get_provider_name()}] API错误: {e.response.status_code} - {e.response.text}")
         except httpx.RequestError as e:
-            logger.error(f"网络请求失败: {str(e)}")
+            logger.error(f"[{self.get_provider_name()}] 网络请求失败: {str(e)}")
         except requests.exceptions.Timeout:
-            logger.error("请求超时")
+            logger.error(f"[{self.get_provider_name()}] 请求超时")
         except requests.exceptions.ConnectionError:
-            logger.error("连接错误")
+            logger.error(f"[{self.get_provider_name()}] 连接错误")
         except requests.exceptions.SSLError:
-            logger.error("SSL证书验证失败")
+            logger.error(f"[{self.get_provider_name()}] SSL证书验证失败")
         except requests.exceptions.RequestException as e:
-            logger.error(f"请求发生异常:{str(e)}")
+            logger.error(f"[{self.get_provider_name()}] 请求发生异常:{str(e)}")
         except json.JSONDecodeError:
-            logger.error("响应数据解析失败")
+            logger.error(f"[{self.get_provider_name()}] 响应数据解析失败")
         except Exception as e:
-            logger.error(f"未知错误: {str(e)}")
+            logger.error(f"[{self.get_provider_name()}] 未知错误: {str(e)}")
 
     async def get_dim_async(self) -> int:
         """获取embedding维数(异步版本)"""
@@ -197,7 +197,7 @@ class BaiduProvider(Provider):
         response.raise_for_status()
         resp_json = response.json()
         if "error_code" in resp_json:
-            logger.error(f"百度千帆接口错误: {resp_json}")
+            logger.error(f"[{self.get_provider_name()}] 百度千帆接口错误: {resp_json}")
             raise RuntimeError(f"Baidu Qianfan error: {resp_json.get('error_msg', 'Unknown error')}")
         return [itm["embedding"] for itm in resp_json["data"]]
 
@@ -219,11 +219,11 @@ class BaiduProvider(Provider):
             self.token_timestamp = dt.now()
             return response.json()["access_token"]
         except requests.HTTPError as e:
-            logger.error(f"百度千帆鉴权失败 HTTP错误: {e.response.status_code}")
+            logger.error(f"[{self.get_provider_name()}] 鉴权失败 HTTP错误: {e.response.status_code}")
         except requests.RequestException as e:
-            logger.error(f"错误详情: {str(e)}")
+            logger.error(f"[{self.get_provider_name()}] 错误详情: {str(e)}")
         except KeyError:
-            logger.error("响应缺少access_token字段")
+            logger.error(f"[{self.get_provider_name()}] 响应缺少access_token字段")
         return None
 
 
@@ -241,7 +241,7 @@ class BaiduProvider(Provider):
             response.raise_for_status()  # 自动处理4xx/5xx状态码
             resp_json = response.json()
             if "error_code" in resp_json:
-                logger.error(f"百度千帆接口错误: {resp_json}")
+                logger.error(f"[{self.get_provider_name()}] 接口错误: {resp_json}")
                 raise RuntimeError(f"Baidu Qianfan error: {resp_json.get('error_msg', 'Unknown error')}")
         
             return [itm["embedding"] for itm in resp_json["data"]]
@@ -266,11 +266,11 @@ class BaiduProvider(Provider):
                 self.token_timestamp = dt.now()
                 return response.json()["access_token"]
         except httpx.HTTPStatusError as e:
-            logger.error(f"百度千帆鉴权失败 HTTP错误: {e.response.status_code}")
+            logger.error(f"[{self.get_provider_name()}] 鉴权失败 HTTP错误: {e.response.status_code}")
         except httpx.ConnectError as e:
-            logger.error(f"错误详情: {e.__cause__}")
+            logger.error(f"[{self.get_provider_name()}] 错误详情: {e.__cause__}")
         except KeyError:
-            logger.error("响应缺少access_token字段")
+            logger.error(f"[{self.get_provider_name()}] 响应缺少access_token字段")
         return None
 
 class OpenaiProvider(Provider):

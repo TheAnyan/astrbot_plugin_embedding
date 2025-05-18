@@ -36,13 +36,14 @@ class EmbeddingAdapter(Star):
                     api_keys = [k.strip() for k in api_keys if k.strip()]
                     embed_models = [m.strip() for m in embed_models if m.strip()]
                     batch_sizes = [b.strip() for b in batch_size if b.strip()]
+
                     # 以最短长度为准，初始化多个openai provider
                     for idx in range(min(len(api_urls), len(api_keys), len(embed_models))):
                         multi_provider_config = {
                             "api_url": api_urls[idx],
                             "api_key": api_keys[idx],
                             "embed_model": embed_models[idx],
-                            "batch_size": int(batch_sizes[idx]) if idx < len(batch_sizes) else batch_sizes[0],
+                            "batch_size": batch_sizes[idx] if idx < len(batch_sizes) else "1",
                         }
                         multi_provider_name = f"openai_{idx+1}" if len(api_urls) > 1 else "openai"
                         self._provider_init(provider_name,multi_provider_name, multi_provider_config)

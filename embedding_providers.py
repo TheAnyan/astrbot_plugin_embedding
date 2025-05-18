@@ -20,7 +20,7 @@ class Provider:
         self.config = config
         self.model = config['embed_model']
         self.dim:Optional[int] = None 
-        self.batch_size = config.get('batch_size', 1)
+        self.batch_size = int(config.get('batch_size', 1))
 
 
     def _get_embedding(self, text: str) -> Optional[list]:

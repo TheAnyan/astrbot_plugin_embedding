@@ -9,7 +9,6 @@ import asyncio
 import openai
 from google import genai
 
-from datetime import datetime as dt
 from typing import Optional, List
 from astrbot.api import logger
 
@@ -106,9 +105,32 @@ class Provider:
             return False
 
 
+    async def get_embedding_async(self, text: str) -> Optional[list]:
+        """获取embedding(异步版本)"""
+        try:
+            response = await self._get_embedding_async(text)
+            return response
+        except httpx.HTTPStatusError as e:
+            logger.error(f"[{self.get_provider_name()}] API错误: {e.response.status_code} - {e.response.text}")
+        except httpx.RequestError as e:
+            logger.error(f"[{self.get_provider_name()}] 网络请求失败: {str(e)}")
+        except requests.exceptions.Timeout:
+            logger.error(f"[{self.get_provider_name()}] 请求超时")
+        except requests.exceptions.ConnectionError:
+            logger.error(f"[{self.get_provider_name()}] 连接错误")
+        except requests.exceptions.SSLError:
+            logger.error(f"[{self.get_provider_name()}] SSL证书验证失败")
+        except requests.exceptions.RequestException as e:
+            logger.error(f"[{self.get_provider_name()}] 请求发生异常:{str(e)}")
+        except json.JSONDecodeError:
+            logger.error(f"[{self.get_provider_name()}] 响应数据解析失败")
+        except Exception as e:
+            logger.error(f"[{self.get_provider_name()}] 未知错误: {str(e)}")
+
+
 
     async def get_embeddings_async(self, texts: List[str]) -> Optional[List[list]]:
-        """获取embedding(异步版本)"""
+        """获取embeddings(异步版本)"""
         all_embeddings = []
         try:
             for i in range(0, len(texts), self.batch_size):
@@ -134,28 +156,6 @@ class Provider:
         except Exception as e:
             logger.error(f"[{self.get_provider_name()}] 未知错误: {str(e)}")
 
-    async def get_embeddings_async(self, texts: List[str]) -> Optional[List[list]]:
-        """获取embedding(异步版本)"""
-        
-        try:
-            response = await self._get_embeddings_async(texts)
-            return response
-        except httpx.HTTPStatusError as e:
-            logger.error(f"[{self.get_provider_name()}] API错误: {e.response.status_code} - {e.response.text}")
-        except httpx.RequestError as e:
-            logger.error(f"[{self.get_provider_name()}] 网络请求失败: {str(e)}")
-        except requests.exceptions.Timeout:
-            logger.error(f"[{self.get_provider_name()}] 请求超时")
-        except requests.exceptions.ConnectionError:
-            logger.error(f"[{self.get_provider_name()}] 连接错误")
-        except requests.exceptions.SSLError:
-            logger.error(f"[{self.get_provider_name()}] SSL证书验证失败")
-        except requests.exceptions.RequestException as e:
-            logger.error(f"[{self.get_provider_name()}] 请求发生异常:{str(e)}")
-        except json.JSONDecodeError:
-            logger.error(f"[{self.get_provider_name()}] 响应数据解析失败")
-        except Exception as e:
-            logger.error(f"[{self.get_provider_name()}] 未知错误: {str(e)}")
 
     async def get_dim_async(self) -> int:
         """获取embedding维数(异步版本)"""

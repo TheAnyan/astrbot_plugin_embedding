@@ -30,7 +30,7 @@ class EmbeddingAdapter(Star):
                     api_urls = provider_config.get("api_url", "").split(",")
                     api_keys = provider_config.get("api_key", "").split(",")
                     embed_models = provider_config.get("embed_model", "").split(",")
-                    batch_size = provider_config.get("batch_size", 1).split(",")
+                    batch_size = provider_config.get("batch_size", "1").split(",")
                     # 去除空格
                     api_urls = [u.strip() for u in api_urls if u.strip()]
                     api_keys = [k.strip() for k in api_keys if k.strip()]

@@ -10,18 +10,23 @@
         "api_url": {
         "type": "string",
         "description": "Openai服务地址",
-        "hint": "可以填写多个url，使用英文逗号分隔，禁止使用空格",
+        "hint": "可以填写多个url，使用英文逗号分隔",
         "default": "https://api.openai.com/v1"
         },
         "api_key": {
           "type": "string",
           "description": "api_key",
-          "hint": "可以填写多个key，与url对应，使用英文逗号分隔，禁止使用空格"
+          "hint": "可以填写多个key，与url对应，使用英文逗号分隔"
         },
         "embed_model": {
           "type": "string",
           "description": "Embedding模型名称",
-          "hint": "可以填写多个model，与url对应，使用英文逗号分隔，禁止使用空格"
+          "hint": "可以填写多个model，与url对应，使用英文逗号分隔"
+        },
+        "batch_size": {
+          "type": "string",
+          "description": "模型最大批量操作数",
+          "hint": "可以填写多个batch_size，与url对应，使用英文逗号分隔"
         }
       }
     },
@@ -36,6 +41,11 @@
         "embed_model": {
           "type": "string",
           "description": "Embedding模型名称"
+        },
+        "batch_size": {
+          "type": "string",
+          "description": "模型最大批量操作数",
+          "hint": "可以填写多个batch_size"
         }
       }
     },

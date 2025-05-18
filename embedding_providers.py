@@ -20,6 +20,7 @@ class Provider:
         self.config = config
         self.model = config['embed_model']
         self.dim:Optional[int] = None 
+        self.batch_size = config.get('batch_size', 1)
 
 
     def _get_embedding(self, text: str) -> Optional[list]:
@@ -68,12 +69,14 @@ class Provider:
 
     def get_embeddings(self, texts: List[str]) -> Optional[List[list]]:
         """获取embedding(同步版本)"""
-
+        all_embeddings = []
         try:
-           
-            response = self._get_embeddings(texts)
-
-            return response
+            for i in range(0, len(texts), self.batch_size):
+                batch = texts[i:i + self.batch_size]
+                response = self._get_embeddings(batch)
+                if response:
+                    all_embeddings.extend(response)
+            return all_embeddings
         except requests.exceptions.Timeout:
             logger.error(f"[{self.get_provider_name()}] 请求超时")
         except requests.exceptions.ConnectionError:
@@ -104,11 +107,16 @@ class Provider:
 
 
 
-    async def get_embedding_async(self, text: str) -> Optional[list]:
+    async def get_embeddings_async(self, texts: List[str]) -> Optional[List[list]]:
         """获取embedding(异步版本)"""
+        all_embeddings = []
         try:
-            response = await self._get_embedding_async(text)
-            return response
+            for i in range(0, len(texts), self.batch_size):
+                batch = texts[i:i + self.batch_size]
+                response = await self._get_embeddings_async(batch)
+                if response:
+                    all_embeddings.extend(response)
+            return all_embeddings
         except httpx.HTTPStatusError as e:
             logger.error(f"[{self.get_provider_name()}] API错误: {e.response.status_code} - {e.response.text}")
         except httpx.RequestError as e:

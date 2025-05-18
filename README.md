@@ -30,7 +30,7 @@ astrbot插件市场搜索astrbot_plugin_embedding_adapter，点击安装，等�
 
 ##### 百度千帆API
 
-直接访问[百度api key](https://console.bce.baidu.com/iam/#/iam/apikey/list)，创建api并授予全部权限，或指定embedding服务授予权限。将获得的api key填入插件配置项。
+直接访问[百度api key](https://console.bce.baidu.com/iam/#/iam/apikey/list)，创建api并授予全部权限，或指定embedding服务授予权限。将获得的api key填入插件配置项。模型名可以参考[模型列表](https://cloud.baidu.com/doc/WENXINWORKSHOP/s/Wm9cvy6rl)。
 
 
 

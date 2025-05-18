@@ -1,33 +1,8 @@
 {
      "whichprovider": {
         "type": "string",
-        "description": "选择调用embedding的provider",
-        "options": ["ollama", "openai","baidu"]
+        "description": "选择调用embedding的provider，小写全拼"
       },
-    "baidu":{
-      "type": "object",
-      "description": "百度千帆",
-      "items": {
-        "api_url": {
-        "type": "string",
-        "description": "在线api服务地址",
-        "default": "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/embeddings"
-        },
-        "api_key": {
-          "type": "string",
-          "description": "api_key"
-        },
-        "secret_key": {
-          "type": "string",
-          "description": "secret_key",
-          "hint": "在调用百度应用使用"
-        },
-        "embed_model": {
-          "type": "string",
-          "description": "Embedding模型名称"
-        }
-      }
-    },
     "openai":{
       "type": "object",
       "description": "Openai",
@@ -35,15 +10,18 @@
         "api_url": {
         "type": "string",
         "description": "Openai服务地址",
-        "default": "https://api.openai.com/v1/embeddings"
+        "hint": "可以填写多个url，使用英文逗号分隔，禁止使用空格",
+        "default": "https://api.openai.com/v1"
         },
         "api_key": {
           "type": "string",
-          "description": "api_key"
+          "description": "api_key",
+          "hint": "可以填写多个key，与url对应，使用英文逗号分隔，禁止使用空格"
         },
         "embed_model": {
           "type": "string",
-          "description": "Embedding模型名称"
+          "description": "Embedding模型名称",
+          "hint": "可以填写多个model，与url对应，使用英文逗号分隔，禁止使用空格"
         }
       }
     },

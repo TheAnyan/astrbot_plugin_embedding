@@ -4,7 +4,6 @@ Embedding提供商映射配置
 """
 
 from .embedding_providers import (
-    BaiduProvider,
     OpenaiProvider,
     OllamaProvider,
     GeminiProvider
@@ -12,7 +11,6 @@ from .embedding_providers import (
 
 # 提供商名称到类的映射
 PROVIDER_CLASS_MAP = {
-    "baidu": BaiduProvider,
     "openai": OpenaiProvider,
     "ollama": OllamaProvider,
     "gemini": GeminiProvider
@@ -20,7 +18,6 @@ PROVIDER_CLASS_MAP = {
 
 # 各提供商所需的配置字段
 REQUIRED_CONFIGS = {
-    "baidu": ["api_url", "embed_model", "api_key", "secret_key"],
     "openai": ["api_url", "embed_model", "api_key"],
     "ollama": ["api_url", "embed_model"],
     "gemini": ["api_key", "embed_model"]

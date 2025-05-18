@@ -18,28 +18,19 @@ astrbot插件市场搜索astrbot_plugin_embedding_adapter，点击安装，等�
 
 ### embedding 模型部署
 
-#### 百度千帆API
-
-请参考百度[鉴权方式文档](https://cloud.baidu.com/doc/WENXINWORKSHOP/s/Dlkm79mnx#%E5%9F%BA%E4%BA%8E%E5%AE%89%E5%85%A8%E8%AE%A4%E8%AF%81aksk%E7%AD%BE%E5%90%8D%E8%AE%A1%E7%AE%97%E8%AE%A4%E8%AF%81)
-
-通过[创建应用](https://console.bce.baidu.com/qianfan/ais/console/applicationConsole/application/v1)获取api_key和secret_key
-
-> [!NOTE]
-> 
-> 请使用v1版本接口，如果在v2版本，请点击切换至旧版
-> 
-> 创建应用时请勾选你需要的模型，模型信息可以参考[百度千帆向量Embeddings](https://cloud.baidu.com/doc/WENXINWORKSHOP/s/alj562vvu)
-
-
 
 
 #### Openai
 
-支持各种与Openai格式兼容的api
+支持添加多种各种与Openai格式兼容的api，通过“,”进行分割，url只需要填写到例如“https://api.openai.com/v1”的程度
 
 > [!NOTE]
 > 
 > api申请指南有待后续补充
+
+##### 百度千帆API
+
+直接访问[百度api key](https://console.bce.baidu.com/iam/#/iam/apikey/list)，创建api并授予全部权限，或指定embedding服务授予权限。将获得的api key填入插件配置项。
 
 
 
@@ -126,16 +117,14 @@ is_ok = await embedding_adapter.is_available_async()
 ```
 
 ## 当前支持的服务商
-1. 百度千帆 (`baidu`)
-   • 需要配置: `api_url`, `api_key`, `secret_key`, `embed_model`
 
-2. OpenAI (`openai`)
+1. OpenAI (`openai`)
    • 需要配置: `api_url`, `api_key`, `embed_model`
 
-3. Ollama本地服务 (`ollama`)
+2. Ollama本地服务 (`ollama`)
    • 需要配置: `api_url`, `embed_model`
 
-4. Gemini (`gemini`)
+3. Gemini (`gemini`)
    • 需要配置: `api_key`, `embed_model`
 
 

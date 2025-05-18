@@ -68,15 +68,12 @@ class Provider:
 
     def get_embeddings(self, texts: List[str]) -> Optional[List[list]]:
         """获取embedding(同步版本)"""
-        batch_size = 16
-        all_embeddings = []
+
         try:
-            for i in range(0, len(texts), batch_size):
-                batch = texts[i:i + batch_size]
-                response = self._get_embeddings(batch)
-                if response:
-                    all_embeddings.extend(response)
-            return all_embeddings
+           
+            response = self._get_embeddings(texts)
+
+            return response
         except requests.exceptions.Timeout:
             logger.error(f"[{self.get_provider_name()}] 请求超时")
         except requests.exceptions.ConnectionError:
@@ -131,15 +128,10 @@ class Provider:
 
     async def get_embeddings_async(self, texts: List[str]) -> Optional[List[list]]:
         """获取embedding(异步版本)"""
-        batch_size = 16
-        all_embeddings = []
+        
         try:
-            for i in range(0, len(texts), batch_size):
-                batch = texts[i:i + batch_size]
-                response = await self._get_embeddings_async(batch)
-                if response:
-                    all_embeddings.extend(response)
-            return all_embeddings
+            response = await self._get_embeddings_async(texts)
+            return response
         except httpx.HTTPStatusError as e:
             logger.error(f"[{self.get_provider_name()}] API错误: {e.response.status_code} - {e.response.text}")
         except httpx.RequestError as e:
@@ -178,104 +170,104 @@ class Provider:
 
 
 
-class BaiduProvider(Provider):
-    def __init__(self, config: dict) -> None:
-        super().__init__(config)
-        self.url = config['api_url']
-        self.api_key = self.config["api_key"]
-        self.secret_key = self.config["secret_key"]
-        self.token_timestamp = None
-        self.access_token = ""
+# class BaiduProvider(Provider):
+#     def __init__(self, config: dict) -> None:
+#         super().__init__(config)
+#         self.url = config['api_url']
+#         self.api_key = self.config["api_key"]
+#         self.secret_key = self.config["secret_key"]
+#         self.token_timestamp = None
+#         self.access_token = ""
 
 
-    def _get_embeddings(self, texts: List[str]) -> Optional[List[list]]:
-        """获取embedding(同步版本)"""
-        if not self.access_token or not self.token_timestamp or abs((dt.now() - self.token_timestamp).days) >= 30:
-            self.access_token = self.get_access_token()
-        params = {"access_token": self.access_token}
-        payload = {"input": texts}
-        headers = {"Content-Type": "application/json"}
-        response = requests.post(
-            self.url + "/" + self.model,
-            headers=headers, params=params, json=payload, timeout=30)
-        response.raise_for_status()
-        resp_json = response.json()
-        if "error_code" in resp_json:
-            logger.error(f"[{self.get_provider_name()}] 百度千帆接口错误: {resp_json}")
-            raise RuntimeError(f"Baidu Qianfan error: {resp_json.get('error_msg', 'Unknown error')}")
-        return [itm["embedding"] for itm in resp_json["data"]]
+#     def _get_embeddings(self, texts: List[str]) -> Optional[List[list]]:
+#         """获取embedding(同步版本)"""
+#         if not self.access_token or not self.token_timestamp or abs((dt.now() - self.token_timestamp).days) >= 30:
+#             self.access_token = self.get_access_token()
+#         params = {"access_token": self.access_token}
+#         payload = {"input": texts}
+#         headers = {"Content-Type": "application/json"}
+#         response = requests.post(
+#             self.url + "/" + self.model,
+#             headers=headers, params=params, json=payload, timeout=30)
+#         response.raise_for_status()
+#         resp_json = response.json()
+#         if "error_code" in resp_json:
+#             logger.error(f"[{self.get_provider_name()}] 百度千帆接口错误: {resp_json}")
+#             raise RuntimeError(f"Baidu Qianfan error: {resp_json.get('error_msg', 'Unknown error')}")
+#         return [itm["embedding"] for itm in resp_json["data"]]
 
-    def get_access_token(self) -> Optional[str]:
-        """同步获取Access Token"""
-        auth_url = "https://aip.baidubce.com/oauth/2.0/token"
-        params = {
-            "grant_type": "client_credentials",
-            "client_id": self.api_key,
-            "client_secret": self.secret_key,
-        }
-        headers = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        }
-        try:
-            response = requests.get(auth_url, params=params, headers=headers, timeout=30)
-            response.raise_for_status()
-            self.token_timestamp = dt.now()
-            return response.json()["access_token"]
-        except requests.HTTPError as e:
-            logger.error(f"[{self.get_provider_name()}] 鉴权失败 HTTP错误: {e.response.status_code}")
-        except requests.RequestException as e:
-            logger.error(f"[{self.get_provider_name()}] 错误详情: {str(e)}")
-        except KeyError:
-            logger.error(f"[{self.get_provider_name()}] 响应缺少access_token字段")
-        return None
+#     def get_access_token(self) -> Optional[str]:
+#         """同步获取Access Token"""
+#         auth_url = "https://aip.baidubce.com/oauth/2.0/token"
+#         params = {
+#             "grant_type": "client_credentials",
+#             "client_id": self.api_key,
+#             "client_secret": self.secret_key,
+#         }
+#         headers = {
+#             'Content-Type': 'application/json',
+#             'Accept': 'application/json'
+#         }
+#         try:
+#             response = requests.get(auth_url, params=params, headers=headers, timeout=30)
+#             response.raise_for_status()
+#             self.token_timestamp = dt.now()
+#             return response.json()["access_token"]
+#         except requests.HTTPError as e:
+#             logger.error(f"[{self.get_provider_name()}] 鉴权失败 HTTP错误: {e.response.status_code}")
+#         except requests.RequestException as e:
+#             logger.error(f"[{self.get_provider_name()}] 错误详情: {str(e)}")
+#         except KeyError:
+#             logger.error(f"[{self.get_provider_name()}] 响应缺少access_token字段")
+#         return None
 
 
-    async def _get_embeddings_async(self, texts: List[str]) -> Optional[List[list]]:
-        """获取embedding(异步版本)"""
-        if not self.access_token or abs((dt.now() - self.token_timestamp).days) >= 30:
-            self.access_token = await self.get_access_token_async()
-        async with httpx.AsyncClient(timeout=30) as client:
-            params = {"access_token": self.access_token}
-            payload = {"input": texts}
-            headers = {"Content-Type": "application/json"}
-            response = await client.post(
-                self.url + "/" + self.model,
-                headers=headers, params=params, json=payload)
-            response.raise_for_status()  # 自动处理4xx/5xx状态码
-            resp_json = response.json()
-            if "error_code" in resp_json:
-                logger.error(f"[{self.get_provider_name()}] 接口错误: {resp_json}")
-                raise RuntimeError(f"Baidu Qianfan error: {resp_json.get('error_msg', 'Unknown error')}")
+#     async def _get_embeddings_async(self, texts: List[str]) -> Optional[List[list]]:
+#         """获取embedding(异步版本)"""
+#         if not self.access_token or abs((dt.now() - self.token_timestamp).days) >= 30:
+#             self.access_token = await self.get_access_token_async()
+#         async with httpx.AsyncClient(timeout=30) as client:
+#             params = {"access_token": self.access_token}
+#             payload = {"input": texts}
+#             headers = {"Content-Type": "application/json"}
+#             response = await client.post(
+#                 self.url + "/" + self.model,
+#                 headers=headers, params=params, json=payload)
+#             response.raise_for_status()  # 自动处理4xx/5xx状态码
+#             resp_json = response.json()
+#             if "error_code" in resp_json:
+#                 logger.error(f"[{self.get_provider_name()}] 接口错误: {resp_json}")
+#                 raise RuntimeError(f"Baidu Qianfan error: {resp_json.get('error_msg', 'Unknown error')}")
         
-            return [itm["embedding"] for itm in resp_json["data"]]
+#             return [itm["embedding"] for itm in resp_json["data"]]
 
 
-    async def get_access_token_async(self) -> Optional[str]:
-        """异步获取Access Token(有效期30天)"""
-        auth_url = "https://aip.baidubce.com/oauth/2.0/token"
-        params = {
-            "grant_type": "client_credentials",
-            "client_id": self.api_key,
-            "client_secret": self.secret_key,
-        }
-        headers = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        }
-        try:
-            async with httpx.AsyncClient(timeout=30) as client:
-                response = await client.get(auth_url, params=params, headers=headers)
-                response.raise_for_status()
-                self.token_timestamp = dt.now()
-                return response.json()["access_token"]
-        except httpx.HTTPStatusError as e:
-            logger.error(f"[{self.get_provider_name()}] 鉴权失败 HTTP错误: {e.response.status_code}")
-        except httpx.ConnectError as e:
-            logger.error(f"[{self.get_provider_name()}] 错误详情: {e.__cause__}")
-        except KeyError:
-            logger.error(f"[{self.get_provider_name()}] 响应缺少access_token字段")
-        return None
+#     async def get_access_token_async(self) -> Optional[str]:
+#         """异步获取Access Token(有效期30天)"""
+#         auth_url = "https://aip.baidubce.com/oauth/2.0/token"
+#         params = {
+#             "grant_type": "client_credentials",
+#             "client_id": self.api_key,
+#             "client_secret": self.secret_key,
+#         }
+#         headers = {
+#             'Content-Type': 'application/json',
+#             'Accept': 'application/json'
+#         }
+#         try:
+#             async with httpx.AsyncClient(timeout=30) as client:
+#                 response = await client.get(auth_url, params=params, headers=headers)
+#                 response.raise_for_status()
+#                 self.token_timestamp = dt.now()
+#                 return response.json()["access_token"]
+#         except httpx.HTTPStatusError as e:
+#             logger.error(f"[{self.get_provider_name()}] 鉴权失败 HTTP错误: {e.response.status_code}")
+#         except httpx.ConnectError as e:
+#             logger.error(f"[{self.get_provider_name()}] 错误详情: {e.__cause__}")
+#         except KeyError:
+#             logger.error(f"[{self.get_provider_name()}] 响应缺少access_token字段")
+#         return None
 
 class OpenaiProvider(Provider):
     def __init__(self, config: dict) -> None:
@@ -289,7 +281,7 @@ class OpenaiProvider(Provider):
     def _get_embeddings(self, texts: List[str]) -> Optional[List[list]]:
         # 使用 openai 库同步获取多个 embedding
         response = self.client.embeddings.create(input=texts, model=self.model)
-        return [item["embedding"] for item in response["data"]]
+        return [item.embedding for item in response.data]
 
 
 class OllamaProvider(Provider):

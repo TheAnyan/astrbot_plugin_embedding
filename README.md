@@ -133,7 +133,7 @@ is_ok = await embedding_adapter.is_available_async()
 | 命令格式                         | 功能描述                  | 示例                 |
 |------------------------------|-----------------------|--------------------|
 | `/em ls`                     | 列出可以选择的提供商，检验可用性 | `/em ls`           |
-| `/em select <provider_name>` | 清空所有群组记录(管理员权限)       | `/em select baidu` |
+| `/em select <provider_name>` | 选择服务提供商(管理员权限)       | `/em select openai` |
 
 ## 项目来源
 

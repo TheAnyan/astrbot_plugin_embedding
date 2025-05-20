@@ -15,11 +15,14 @@ from astrbot.api import logger
 TEXT = "test"
 
 class Provider:
-    def __init__(self, config: dict) -> None:
+    def __init__(self,name:str, config: dict) -> None:
+        self.name = name
         self.config = config
         self.model = config['embed_model']
-        self.dim:Optional[int] = None 
-        self.batch_size = int(config.get('batch_size', 1))
+        # self.batch_size = int(config.get('batch_size', 1))
+
+        self.dim:Optional[int] = None
+        self.test_embedding:Optional[List[int]] = None 
 
 
     def _get_embedding(self, text: str) -> Optional[list]:
@@ -45,7 +48,7 @@ class Provider:
 
     def get_provider_name(self) -> int:
         """获取embeddingmodel"""
-        return self.__class__.__name__
+        return self.name
 
 
     def get_embedding(self, text: str) -> Optional[list]:
@@ -68,14 +71,8 @@ class Provider:
 
     def get_embeddings(self, texts: List[str]) -> Optional[List[list]]:
         """获取embedding(同步版本)"""
-        all_embeddings = []
         try:
-            for i in range(0, len(texts), self.batch_size):
-                batch = texts[i:i + self.batch_size]
-                response = self._get_embeddings(batch)
-                if response:
-                    all_embeddings.extend(response)
-            return all_embeddings
+            return self._get_embeddings(texts)
         except requests.exceptions.Timeout:
             logger.error(f"[{self.get_provider_name()}] 请求超时")
         except requests.exceptions.ConnectionError:
@@ -91,8 +88,15 @@ class Provider:
 
     def get_dim(self) -> int:
         """获取embedding维数"""
-        self.is_available()
+        if self.dim is None:
+            self.is_available()
         return self.dim
+    
+    def get_test_embedding(self) -> int:
+        """获取测试的embedding"""
+        if self.test_embedding is None:
+            self.is_available()
+        return self.test_embedding
 
 
     def is_available(self) -> bool:
@@ -100,6 +104,7 @@ class Provider:
         emb = self.get_embedding(TEXT)
         if bool(emb) and isinstance(emb, list):
             self.dim = len(emb)
+            self.test_embedding=emb
             return True
         else:
             return False
@@ -131,14 +136,8 @@ class Provider:
 
     async def get_embeddings_async(self, texts: List[str]) -> Optional[List[list]]:
         """获取embeddings(异步版本)"""
-        all_embeddings = []
         try:
-            for i in range(0, len(texts), self.batch_size):
-                batch = texts[i:i + self.batch_size]
-                response = await self._get_embeddings_async(batch)
-                if response:
-                    all_embeddings.extend(response)
-            return all_embeddings
+            return await self._get_embeddings_async(texts)
         except httpx.HTTPStatusError as e:
             logger.error(f"[{self.get_provider_name()}] API错误: {e.response.status_code} - {e.response.text}")
         except httpx.RequestError as e:
@@ -159,9 +158,16 @@ class Provider:
 
     async def get_dim_async(self) -> int:
         """获取embedding维数(异步版本)"""
-        await self.is_available_async()
+        if self.dim is None:
+            await self.is_available_async()
         # 验证返回格式：非空列表且包含浮点数
         return self.dim
+    
+    async def get_test_embedding_async(self) -> int:
+        """获取测试的embedding"""
+        if self.test_embedding is None:
+            await self.is_available_async()
+        return self.test_embedding
 
     async def is_available_async(self) -> bool:
         """通过实际嵌入请求验证服务可用性"""
@@ -170,6 +176,7 @@ class Provider:
         # 验证返回格式：非空列表且包含浮点数
         if bool(emb) and isinstance(emb, list):
             self.dim = len(emb)
+            self.test_embedding=emb
             return True
         else:
             return False
@@ -278,8 +285,8 @@ class Provider:
 #         return None
 
 class OpenaiProvider(Provider):
-    def __init__(self, config: dict) -> None:
-        super().__init__(config)
+    def __init__(self,name:str, config: dict) -> None:
+        super().__init__(name,config)
         self.url = config['api_url']
         self.api_key = self.config["api_key"]
 
@@ -293,8 +300,8 @@ class OpenaiProvider(Provider):
 
 
 class OllamaProvider(Provider):
-    def __init__(self, config: dict) -> None:
-        super().__init__(config)
+    def __init__(self,name:str, config: dict) -> None:
+        super().__init__(name,config)
         self.url = config['api_url']
 
     def _get_embedding(self, text: str) -> Optional[list]:
@@ -358,8 +365,8 @@ class OllamaProvider(Provider):
             return False
 
 class GeminiProvider(Provider):
-    def __init__(self, config: dict) -> None:
-        super().__init__(config)
+    def __init__(self,name:str, config: dict) -> None:
+        super().__init__(name,config)
         self.api_key = self.config["api_key"]
         self.model = self.config["embed_model"]
         self.client = genai.Client(api_key=self.api_key)

@@ -32,13 +32,14 @@ astrbot插件市场搜索astrbot_plugin_embedding_adapter，点击安装，等�
 
 直接访问[百度api key](https://console.bce.baidu.com/iam/#/iam/apikey/list)，创建api并授予全部权限，或指定embedding服务授予权限。将获得的api key填入插件配置项。模型名可以参考[模型列表](https://cloud.baidu.com/doc/WENXINWORKSHOP/s/Wm9cvy6rl)。
 
+#### 硅基流动
 
+[创建api](https://cloud.siliconflow.cn/account/ak)，并[选择Embedding模型](https://cloud.siliconflow.cn/models)
 
 #### Gemini
 
-> [!NOTE]
-> 
-> api申请指南有待后续补充
+需要非国内ip，[获取api](https://ai.google.dev/gemini-api/docs/api-key?hl=zh-cn)，并[选择Embedding模型](https://ai.google.dev/gemini-api/docs/embeddings?hl=zh-cn)
+
 
 
 #### 本地Ollama服务部署（推荐）

@@ -138,8 +138,8 @@ class ModelGroupProvider:
             else:
                 uncached_texts.append(t)
         if uncached_texts:
-            if len(uncached_texts) > self.balance_threshold:
-                # 如果未缓存的文本数量大于平衡阈值，则使用第一个provider
+            if len(uncached_texts) < self.balance_threshold:
+                # 如果未缓存的文本数量小于平衡阈值，则使用第一个provider
                 results = await self.providers[self.default_provider_index].get_embeddings_async(uncached_texts)
                 for t, r in zip(uncached_texts, results):
                     self._set_cache(t, r)

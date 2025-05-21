@@ -204,7 +204,7 @@ class EmbeddingAdapter(Star):
         if name in self.groups:
             self.current_provider_group = self.groups[name]
             self.config["whichgroup"]=name
-            # self.config.save_config()
+            self.config.save_config()
             try:
                 self.current_provider_group.set_default_provider(default_index)
                 yield event.plain_result(f"已切换到模型为{name}的服务商：{self.current_provider_group.providers[default_index].get_provider_name()}")

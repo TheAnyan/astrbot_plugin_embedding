@@ -144,33 +144,40 @@ class ModelGroupProvider:
                 for t, r in zip(uncached_texts, results):
                     self._set_cache(t, r)
                     cache_map[t] = r
-            else:#我希望任务能先分批，化为子任务，先将任务分配给不同的provider，哪个provider处理完了就再安排一个任务，每个任务有超时时间，如果没有完成就重新布置，且降低该provider的优先级
+            else:
                 # 分批分配任务给不同provider，动态调度，每个子任务的texts数目为self.batch_size
                 provider_count = len(self.providers)
                 provider_scores = [0] * provider_count  # 记录每个provider的优先级（失败则+1）
+                provider_occupied = [False] * provider_count  # 记录每个provider的占用情况
                 timeouts = 10  # 每个任务超时时间（秒）
 
                 # 将uncached_texts分批，每批大小为self.batch_size
                 batches = [uncached_texts[i:i+self.batch_size] for i in range(0, len(uncached_texts), self.batch_size)]
                 batch_indices = [list(range(i, min(i+self.batch_size, len(uncached_texts)))) for i in range(0, len(uncached_texts), self.batch_size)]
 
+
                 async def run_batch(batch, indices):
                     nonlocal provider_scores
+                    nonlocal provider_occupied
                     tried = set()
                     while True:
                         # 选择分数最低的provider
-                        candidates = [i for i in range(provider_count) if i not in tried]
+                        candidates = [i for i in range(provider_count) if i not in tried and not provider_occupied[i]]
                         if not candidates:
                             tried.clear()
                             candidates = list(range(provider_count))
                         provider_idx = min(candidates, key=lambda i: provider_scores[i])
                         provider = self.providers[provider_idx]
                         try:
+                            logger.info(f"使用provider {provider.get_provider_name()} 处理文本: {batch}")
+                            provider_occupied[provider_idx] = True
                             r = await asyncio.wait_for(provider.get_embeddings_async(batch), timeout=timeouts)
                             provider_scores[provider_idx] = max(0, provider_scores[provider_idx] - 1)
+                            provider_occupied[provider_idx] = False
                             return r, indices
                         except Exception:
                             provider_scores[provider_idx] += 1
+                            provider_occupied[provider_idx] = False
                             tried.add(provider_idx)
 
                 # 启动所有批次任务

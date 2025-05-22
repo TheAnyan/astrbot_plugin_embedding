@@ -27,7 +27,7 @@ class ModelGroupProvider:
         # 负载均衡参数
         self.default_provider_index = default_provider_index
         self.balance_threshold = 10
-        self.batch_size = 5
+        self.batch_size = 8
 
     def add_provider(self, provider:Provider):
         """
@@ -147,40 +147,43 @@ class ModelGroupProvider:
             else:
                 # 分批分配任务给不同provider，动态调度，每个子任务的texts数目为self.batch_size
                 provider_count = len(self.providers)
-                provider_scores = [0] * provider_count  # 记录每个provider的优先级（失败则+1）
-                provider_occupied = [False] * provider_count  # 记录每个provider的占用情况
+                provider_available = list(range(provider_count))  # 记录每个provider的占用情况
                 timeouts = 10  # 每个任务超时时间（秒）
+                provider_avg_time = [1.0] * provider_count # 初始化每个provider的平均响应时间
 
                 # 将uncached_texts分批，每批大小为self.batch_size
                 batches = [uncached_texts[i:i+self.batch_size] for i in range(0, len(uncached_texts), self.batch_size)]
                 batch_indices = [list(range(i, min(i+self.batch_size, len(uncached_texts)))) for i in range(0, len(uncached_texts), self.batch_size)]
 
-
+                logger.info(f"测试: {provider_available}")
                 async def run_batch(batch, indices):
-                    nonlocal provider_scores
-                    nonlocal provider_occupied
-                    tried = set()
+                    nonlocal provider_avg_time
+                    nonlocal provider_available
                     while True:
-                        # 选择分数最低的provider
-                        candidates = [i for i in range(provider_count) if i not in tried and not provider_occupied[i]]
-                        if not candidates:
-                            tried.clear()
-                            candidates = list(range(provider_count))
-                        provider_idx = min(candidates, key=lambda i: provider_scores[i])
+                        if not provider_available:
+                            # 如果所有provider都在忙，则等待
+                            await asyncio.sleep(0.1)
+                            continue
+                        # 选择平均响应时间最短的provider
+                        provider_idx = min(provider_available, key=lambda i: provider_avg_time[i])
+                        provider_available.remove(provider_idx)  # 标记为占用
+                        # 选择provider_idx
                         provider = self.providers[provider_idx]
+                        logger.info(f"使用provider {provider.get_provider_name()}")
+                        start = time.time()
                         try:
-                            logger.info(f"使用provider {provider.get_provider_name()} 处理文本: {batch}")
-                            provider_occupied[provider_idx] = True
                             r = await asyncio.wait_for(provider.get_embeddings_async(batch), timeout=timeouts)
-                            provider_scores[provider_idx] = max(0, provider_scores[provider_idx] - 1)
-                            provider_occupied[provider_idx] = False
+                            elapsed = time.time() - start
+                            # 更新平均响应时间（滑动平均）
+                            provider_avg_time[provider_idx] = 0.7 * provider_avg_time[provider_idx] + 0.3 * elapsed
+                            provider_available.append(provider_idx)  # 释放占用
                             return r, indices
                         except Exception:
-                            provider_scores[provider_idx] += 1
-                            provider_occupied[provider_idx] = False
-                            tried.add(provider_idx)
+                            provider_avg_time[provider_idx] += 2  # 出错惩罚
+                            provider_available.append(provider_idx)
+                            logger.error(f"provider {provider.get_provider_name()} 处理文本失败: {batch}")
+                            raise
 
-                # 启动所有批次任务
                 tasks = [asyncio.create_task(run_batch(batch, idxs)) for batch, idxs in zip(batches, batch_indices)]
                 finished = await asyncio.gather(*tasks)
                 for r, idxs in finished:

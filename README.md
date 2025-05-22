@@ -18,15 +18,13 @@ astrbot插件市场搜索astrbot_plugin_embedding_adapter，点击安装，等�
 
 ### embedding 模型部署
 
-
-
 #### Openai
 
-支持添加多种各种与Openai格式兼容的api，通过“,”进行分割，url只需要填写到例如“https://api.openai.com/v1”的程度
+支持添加多种各种与Openai格式兼容的api，通过“,”进行分割，url只需要填写到例如"https://api.openai.com/v1"的程度
 
 > [!NOTE]
 > 
-> api申请指南有待后续补充
+> 更多api申请指南有待后续补充
 
 ##### 百度千帆API
 
@@ -135,6 +133,13 @@ is_ok = await embedding_adapter.is_available_async()
 |------------------------------|-----------------------|--------------------|
 | `/em ls`                     | 列出可以选择的提供商，检验可用性 | `/em ls`           |
 | `/em select <provider_name>` | 清空所有群组记录(管理员权限)       | `/em select baidu` |
+
+## 版本更新
+
+### v1.1.0
+- 支持以模型分类多个API，允许为同一模型配置多个服务商。
+- 若模型数大于1，`get_embeddings_async`方法支持负载均衡功能，自动分配请求到不同API以提升并发性能。
+- 增加了缓存功能，防止多次调用产生无意义的重复查询，提升效率。
 
 ## 项目来源
 

@@ -28,6 +28,7 @@ class ModelGroupProvider:
         self.default_provider_index = default_provider_index
         self.balance_threshold = 10
         self.batch_size = 8
+        self.try_count_limit = 10
 
     def add_provider(self, provider:Provider):
         """
@@ -159,11 +160,14 @@ class ModelGroupProvider:
                 async def run_batch(batch, indices):
                     nonlocal provider_avg_time
                     nonlocal provider_available
+                    try_count = 0
                     while True:
-                        if not provider_available:
+                        while not provider_available:
                             # 如果所有provider都在忙，则等待
                             await asyncio.sleep(0.1)
-                            continue
+                        if try_count > self.try_count_limit:
+                            raise RuntimeError("多次调用失败，终止查询")
+                        try_count += 1
                         # 选择平均响应时间最短的provider
                         provider_idx = min(provider_available, key=lambda i: provider_avg_time[i])
                         provider_available.remove(provider_idx)  # 标记为占用

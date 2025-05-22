@@ -1,7 +1,8 @@
 {
-     "whichprovider": {
+     "whichgroup": {
         "type": "string",
-        "description": "选择调用embedding的provider，小写全拼"
+        "description": "选择调用embedding的模型",
+        "hint":"也可以空着，用命令/em select 选择"
       },
     "openai":{
       "type": "object",
@@ -45,7 +46,7 @@
         "batch_size": {
           "type": "string",
           "description": "模型最大批量操作数",
-          "hint": "可以填写多个batch_size"
+          "hint": "可以填写多个batch_size，与url对应，使用英文逗号分隔"
         }
       }
     },

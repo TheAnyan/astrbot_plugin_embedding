@@ -24,7 +24,7 @@ REQUIRED_CONFIGS = {
 }
 
 
-def get_provider(provider_name: str, config: dict):
+def get_provider(provider_name: str, name: str, config: dict):
     """
     获取指定provider的实例
     :param provider_name: 提供商名称
@@ -40,4 +40,4 @@ def get_provider(provider_name: str, config: dict):
     if missing:
         raise ValueError(f"缺少必要配置字段: {missing}")
 
-    return PROVIDER_CLASS_MAP[provider_name](config)
+    return PROVIDER_CLASS_MAP[provider_name](name,config)

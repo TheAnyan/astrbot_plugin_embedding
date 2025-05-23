@@ -173,7 +173,7 @@ class ModelGroupProvider:
                         provider_available.remove(provider_idx)  # 标记为占用
                         # 选择provider_idx
                         provider = self.providers[provider_idx]
-                        logger.info(f"使用provider {provider.get_provider_name()}")
+                        # logger.info(f"使用provider {provider.get_provider_name()}")
                         start = time.time()
                         try:
                             r = await asyncio.wait_for(provider.get_embeddings_async(batch), timeout=timeouts)
